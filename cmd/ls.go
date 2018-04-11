@@ -18,6 +18,8 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"os"
+	"path/filepath"
 )
 
 // lsCmd represents the ls command
@@ -31,7 +33,24 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("ls called")
+		searchDir := "/sys/fs/cgroup/pids"
+
+		cgoups := []string{}
+		err := filepath.Walk(searchDir, func(path string, f os.FileInfo, err error) error {
+			if f.IsDir() {
+				cgoups = append(cgoups, path)
+			}
+			return nil
+		})
+
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
+		for _, c := range cgoups {
+			fmt.Println(c)
+		}
 	},
 }
 
