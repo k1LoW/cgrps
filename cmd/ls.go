@@ -25,41 +25,72 @@ import (
 
 	"bufio"
 	"github.com/spf13/cobra"
-	"log"
 	"os"
-	// "path/filepath"
+	"path/filepath"
+	"strings"
 )
 
 // lsCmd represents the ls command
 var lsCmd = &cobra.Command{
 	Use:   "ls",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "list cgroups",
+	Long:  `list cgroups.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		searchDir := "/sys/fs/cgroup/pids"
-
+		subsys := findSubsys()
 		cgoups := []string{}
-		err := filepath.Walk(searchDir, func(path string, f os.FileInfo, err error) error {
-			if f.IsDir() {
-				cgoups = append(cgoups, path)
-			}
-			return nil
-		})
+		encountered := make(map[string]bool)
 
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+		for _, s := range subsys {
+			searchDir := fmt.Sprintf("/sys/fs/cgroup/%s", s)
+
+			err := filepath.Walk(searchDir, func(path string, f os.FileInfo, err error) error {
+				if f.IsDir() {
+					c := strings.Replace(path, searchDir, "", 1)
+					if !encountered[c] {
+						encountered[c] = true
+						cgoups = append(cgoups, c)
+					}
+				}
+				return nil
+			})
+
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
 		}
 
 		for _, c := range cgoups {
 			fmt.Println(c)
 		}
 	},
+}
+
+func findSubsys() []string {
+	subsys := []string{}
+	f, err := os.Open("/proc/cgroups")
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	defer f.Close()
+	sc := bufio.NewScanner(f)
+	for sc.Scan() {
+		if err := sc.Err(); err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		line := sc.Text()
+		if strings.IndexRune(line, '#') == 0 {
+			continue
+		}
+		splited := strings.SplitN(line, "\t", 2)
+		subsys = append(subsys, splited[0])
+	}
+	for _, s := range subsys {
+		fmt.Println(s)
+	}
+	return subsys
 }
 
 func init() {
