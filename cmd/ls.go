@@ -36,7 +36,12 @@ var lsCmd = &cobra.Command{
 	Short: "list cgroups",
 	Long:  `list cgroups.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		subsys := findSubsys()
+		subsys, err := findSubsys()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
 		cs := []string{}
 		encountered := make(map[string]bool)
 
@@ -66,17 +71,16 @@ var lsCmd = &cobra.Command{
 	},
 }
 
-func findSubsys() []string {
+func findSubsys() ([]string, error) {
 	ss := []string{}
 	subsystems, err := cgroups.V1()
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		return nil, err
 	}
 	for _, s := range subsystems {
 		ss = append(ss, string(s.Name()))
 	}
-	return ss
+	return ss, nil
 }
 
 func init() {
