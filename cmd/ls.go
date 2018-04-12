@@ -23,7 +23,7 @@ package cmd
 import (
 	"fmt"
 
-	"bufio"
+	"github.com/containerd/cgroups"
 	"github.com/spf13/cobra"
 	"os"
 	"path/filepath"
@@ -37,7 +37,7 @@ var lsCmd = &cobra.Command{
 	Long:  `list cgroups.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		subsys := findSubsys()
-		cgoups := []string{}
+		cs := []string{}
 		encountered := make(map[string]bool)
 
 		for _, s := range subsys {
@@ -46,9 +46,9 @@ var lsCmd = &cobra.Command{
 			err := filepath.Walk(searchDir, func(path string, f os.FileInfo, err error) error {
 				if f.IsDir() {
 					c := strings.Replace(path, searchDir, "", 1)
-					if !encountered[c] {
+					if c != "" && !encountered[c] {
 						encountered[c] = true
-						cgoups = append(cgoups, c)
+						cs = append(cs, c)
 					}
 				}
 				return nil
@@ -60,37 +60,23 @@ var lsCmd = &cobra.Command{
 			}
 		}
 
-		for _, c := range cgoups {
+		for _, c := range cs {
 			fmt.Println(c)
 		}
 	},
 }
 
 func findSubsys() []string {
-	subsys := []string{}
-	f, err := os.Open("/proc/cgroups")
+	ss := []string{}
+	subsystems, err := cgroups.V1()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	defer f.Close()
-	sc := bufio.NewScanner(f)
-	for sc.Scan() {
-		if err := sc.Err(); err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		line := sc.Text()
-		if strings.IndexRune(line, '#') == 0 {
-			continue
-		}
-		splited := strings.SplitN(line, "\t", 2)
-		subsys = append(subsys, splited[0])
+	for _, s := range subsystems {
+		ss = append(ss, string(s.Name()))
 	}
-	for _, s := range subsys {
-		fmt.Println(s)
-	}
-	return subsys
+	return ss
 }
 
 func init() {

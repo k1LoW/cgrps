@@ -17,21 +17,56 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/containerd/cgroups"
 	"github.com/spf13/cobra"
+	"golang.org/x/crypto/ssh/terminal"
+	"io/ioutil"
+	"os"
+	"strings"
 )
 
 // statCmd represents the stat command
 var statCmd = &cobra.Command{
 	Use:   "stat",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "cgroup stat",
+	Long:  `cgroup stat.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("stat called")
+		var c string
+
+		if terminal.IsTerminal(0) {
+			c = args[0]
+		} else {
+			b, _ := ioutil.ReadAll(os.Stdin)
+			c = strings.TrimRight(string(b), "\n")
+		}
+
+		f := func() ([]cgroups.Subsystem, error) {
+			enabled := []cgroups.Subsystem{}
+			subsystems, err := cgroups.V1()
+			if err != nil {
+				return nil, err
+			}
+			for _, s := range subsystems {
+				path := fmt.Sprintf("/sys/fs/cgroup/%s%s", s.Name(), c)
+				if _, err := os.Lstat(path); err != nil {
+					continue
+				}
+				enabled = append(enabled, s)
+			}
+			return enabled, nil
+		}
+
+		control, err := cgroups.Load(f, cgroups.StaticPath(c))
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		stats, err := control.Stat(cgroups.IgnoreNotExist)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		fmt.Printf("%s\n", stats)
 	},
 }
 

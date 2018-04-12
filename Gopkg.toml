@@ -23,7 +23,7 @@
 #   non-go = false
 #   go-tests = true
 #   unused-packages = true
-
+required = ["github.com/opencontainers/runtime-spec/specs-go"]
 
 [[constraint]]
   branch = "master"
@@ -40,3 +40,11 @@
 [prune]
   go-tests = true
   unused-packages = true
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/containerd/cgroups"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/opencontainers/runtime-spec"
