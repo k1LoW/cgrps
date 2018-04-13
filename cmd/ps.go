@@ -37,8 +37,8 @@ import (
 // psCmd represents the ps command
 var psCmd = &cobra.Command{
 	Use:   "ps [CGROUP]",
-	Short: "list processes in cgroup",
-	Long:  `list processes in cgroup.`,
+	Short: "report a snapshot of the current cgroups processes",
+	Long:  `report a snapshot of the current cgroups processes.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if terminal.IsTerminal(0) {
 			if len(args) < 1 {
@@ -57,21 +57,7 @@ var psCmd = &cobra.Command{
 			c = strings.TrimRight(string(b), "\n")
 		}
 
-		f := func() ([]cgroups.Subsystem, error) {
-			enabled := []cgroups.Subsystem{}
-			subsystems, err := cgroups.V1()
-			if err != nil {
-				return nil, err
-			}
-			for _, s := range subsystems {
-				path := fmt.Sprintf("/sys/fs/cgroup/%s%s", s.Name(), c)
-				if _, err := os.Lstat(path); err != nil {
-					continue
-				}
-				enabled = append(enabled, s)
-			}
-			return enabled, nil
-		}
+		f := genHierarchy(c)
 
 		control, err := cgroups.Load(f, cgroups.StaticPath(c))
 		if err != nil {

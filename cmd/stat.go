@@ -49,21 +49,7 @@ var statCmd = &cobra.Command{
 			c = strings.TrimRight(string(b), "\n")
 		}
 
-		f := func() ([]cgroups.Subsystem, error) {
-			enabled := []cgroups.Subsystem{}
-			subsystems, err := cgroups.V1()
-			if err != nil {
-				return nil, err
-			}
-			for _, s := range subsystems {
-				path := fmt.Sprintf("/sys/fs/cgroup/%s%s", s.Name(), c)
-				if _, err := os.Lstat(path); err != nil {
-					continue
-				}
-				enabled = append(enabled, s)
-			}
-			return enabled, nil
-		}
+		f := genHierarchy(c)
 
 		control, err := cgroups.Load(f, cgroups.StaticPath(c))
 		if err != nil {

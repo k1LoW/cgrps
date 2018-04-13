@@ -22,8 +22,6 @@ package cmd
 
 import (
 	"fmt"
-
-	"github.com/containerd/cgroups"
 	"github.com/spf13/cobra"
 	"os"
 	"path/filepath"
@@ -70,18 +68,6 @@ var lsCmd = &cobra.Command{
 			fmt.Println(c)
 		}
 	},
-}
-
-func subsystems() ([]string, error) {
-	ss := []string{}
-	subsystems, err := cgroups.V1()
-	if err != nil {
-		return nil, err
-	}
-	for _, s := range subsystems {
-		ss = append(ss, string(s.Name()))
-	}
-	return ss, nil
 }
 
 func init() {
