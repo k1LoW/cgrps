@@ -65,13 +65,10 @@
   version = "v1.0"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/keybase/go-ps"
-  packages = [
-    ".",
-    "darwincgo"
-  ]
-  revision = "668c8856d9992f97248b3177d45743d2cc1068db"
+  branch = "fix-scan-stat"
+  name = "github.com/k1LoW/go-ps"
+  packages = ["."]
+  revision = "3b20a0f983dbf5c60ed2e0192cad07f87081ef27"
 
 [[projects]]
   name = "github.com/magiconair/properties"
@@ -185,6 +182,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "67291d9aac0fc7fa25b1a4840f321c443b181bdbef24048eaf8f7f23ac7056de"
+  inputs-digest = "73e46c3d555c8007e5cda490eb6240a33ac6320390dc6bc06711ba0fc81931ff"
   solver-name = "gps-cdcl"
   solver-version = 1

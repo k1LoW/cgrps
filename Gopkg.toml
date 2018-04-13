@@ -48,3 +48,7 @@ required = ["github.com/opencontainers/runtime-spec/specs-go"]
 [[constraint]]
   branch = "master"
   name = "github.com/opencontainers/runtime-spec"
+
+[[constraint]]
+  branch = "fix-scan-stat"
+  name = "github.com/k1LoW/go-ps"

@@ -25,11 +25,12 @@ import (
 
 	"errors"
 	"github.com/containerd/cgroups"
-	ps "github.com/keybase/go-ps"
+	"github.com/k1LoW/go-ps"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh/terminal"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -85,18 +86,19 @@ var psCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		fmt.Println(fmt.Sprintf("%5s", "PID"), fmt.Sprintf("%5s", "PPID"), fmt.Sprintf("%10s", "CMD"), "PATH")
+		fmt.Println(fmt.Sprintf("%5s", "PID"), fmt.Sprintf("%5s", "PPID"), fmt.Sprintf("%15s", "CMD"), "PATH")
 		for _, p := range processes {
 			pr, err := ps.FindProcess(p.Pid)
 			if err != nil {
+				fmt.Println(p.Pid)
 				fmt.Println(err)
 				os.Exit(1)
 			}
-			path, err := pr.Path()
+			path, err := filepath.EvalSymlinks(fmt.Sprintf("/proc/%d/exe", p.Pid))
 			if err != nil {
 				path = "-"
 			}
-			fmt.Println(fmt.Sprintf("%5d", pr.Pid()), fmt.Sprintf("%5d", pr.PPid()), fmt.Sprintf("%10s", pr.Executable()), path)
+			fmt.Println(fmt.Sprintf("%5d", pr.Pid()), fmt.Sprintf("%5d", pr.PPid()), fmt.Sprintf("%15s", pr.Executable()), path)
 		}
 	},
 }
