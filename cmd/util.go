@@ -38,7 +38,7 @@ func subsystems() ([]string, error) {
 	return ss, nil
 }
 
-func genHierarchy(c string) cgroups.Hierarchy {
+func hierarchy(c string) cgroups.Hierarchy {
 	f := func() ([]cgroups.Subsystem, error) {
 		enabled := []cgroups.Subsystem{}
 		subsystems, err := cgroups.V1()

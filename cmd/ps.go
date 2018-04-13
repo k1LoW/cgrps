@@ -21,9 +21,8 @@
 package cmd
 
 import (
-	"fmt"
-
 	"errors"
+	"fmt"
 	"github.com/containerd/cgroups"
 	"github.com/k1LoW/go-ps"
 	"github.com/spf13/cobra"
@@ -57,9 +56,9 @@ var psCmd = &cobra.Command{
 			c = strings.TrimRight(string(b), "\n")
 		}
 
-		f := genHierarchy(c)
+		h := hierarchy(c)
 
-		control, err := cgroups.Load(f, cgroups.StaticPath(c))
+		control, err := cgroups.Load(h, cgroups.StaticPath(c))
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
