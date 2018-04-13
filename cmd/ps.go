@@ -23,21 +23,81 @@ package cmd
 import (
 	"fmt"
 
+	"errors"
+	"github.com/containerd/cgroups"
+	ps "github.com/keybase/go-ps"
 	"github.com/spf13/cobra"
+	"golang.org/x/crypto/ssh/terminal"
+	"io/ioutil"
+	"os"
+	"strings"
 )
 
 // psCmd represents the ps command
 var psCmd = &cobra.Command{
-	Use:   "ps",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Use:   "ps [CGROUP]",
+	Short: "list processes in cgroup",
+	Long:  `list processes in cgroup.`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if terminal.IsTerminal(0) {
+			if len(args) < 1 {
+				return errors.New("requires [CGROUP] or STDIN")
+			}
+		}
+		return nil
+	},
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("ps called")
+		var c string
+
+		if terminal.IsTerminal(0) {
+			c = args[0]
+		} else {
+			b, _ := ioutil.ReadAll(os.Stdin)
+			c = strings.TrimRight(string(b), "\n")
+		}
+
+		f := func() ([]cgroups.Subsystem, error) {
+			enabled := []cgroups.Subsystem{}
+			subsystems, err := cgroups.V1()
+			if err != nil {
+				return nil, err
+			}
+			for _, s := range subsystems {
+				path := fmt.Sprintf("/sys/fs/cgroup/%s%s", s.Name(), c)
+				if _, err := os.Lstat(path); err != nil {
+					continue
+				}
+				enabled = append(enabled, s)
+			}
+			return enabled, nil
+		}
+
+		control, err := cgroups.Load(f, cgroups.StaticPath(c))
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		subsys := control.Subsystems()
+
+		processes, err := control.Processes(subsys[0].Name(), true)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
+		fmt.Println(fmt.Sprintf("%5s", "PID"), fmt.Sprintf("%5s", "PPID"), fmt.Sprintf("%10s", "CMD"), "PATH")
+		for _, p := range processes {
+			pr, err := ps.FindProcess(p.Pid)
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+			path, err := pr.Path()
+			if err != nil {
+				path = "-"
+			}
+			fmt.Println(fmt.Sprintf("%5d", pr.Pid()), fmt.Sprintf("%5d", pr.PPid()), fmt.Sprintf("%10s", pr.Executable()), path)
+		}
 	},
 }
 
