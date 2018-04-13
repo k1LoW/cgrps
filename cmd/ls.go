@@ -35,6 +35,7 @@ var lsCmd = &cobra.Command{
 	Use:   "ls",
 	Short: "list cgroups",
 	Long:  `list cgroups.`,
+	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		subsys, err := findSubsys()
 		if err != nil {

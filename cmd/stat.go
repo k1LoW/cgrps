@@ -17,6 +17,7 @@ package cmd
 import (
 	"fmt"
 
+	"errors"
 	"github.com/containerd/cgroups"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh/terminal"
@@ -27,9 +28,17 @@ import (
 
 // statCmd represents the stat command
 var statCmd = &cobra.Command{
-	Use:   "stat",
+	Use:   "stat [CGROUP]",
 	Short: "cgroup stat",
 	Long:  `cgroup stat.`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if terminal.IsTerminal(0) {
+			if len(args) < 1 {
+				return errors.New("requires [CGROUP] or STDIN")
+			}
+		}
+		return nil
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		var c string
 
