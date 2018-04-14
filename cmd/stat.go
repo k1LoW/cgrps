@@ -127,37 +127,6 @@ var statCmd = &cobra.Command{
 	},
 }
 
-func NewCgroupStat(cpath string) (*termui.List, *termui.List) {
-	label := termui.NewList()
-	label.Border = false
-	label.ItemFgColor = termui.ColorYellow
-	label.Items = []string{
-		"  cgroup path:",
-		"  cgroup.procs:",
-	}
-	label.Height = 3
-
-	data := termui.NewList()
-	data.Border = false
-	data.Items = []string{
-		cpath, "-",
-	}
-	data.Height = 3
-
-	return label, data
-}
-
-func DrawCgroupStat(cpath string, control cgroups.Cgroup, label *termui.List, data *termui.List) {
-	subsys := control.Subsystems()
-	processes, err := control.Processes(subsys[0].Name(), true)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	// cgroup.procs
-	data.Items[1] = fmt.Sprintf("%d", len(processes)) // @todo use /sys/fs/cgroup/$/cgroup.procs directly
-}
-
 func init() {
 	rootCmd.AddCommand(statCmd)
 
