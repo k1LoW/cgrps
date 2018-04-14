@@ -24,14 +24,13 @@ import (
 	"errors"
 	"fmt"
 	"github.com/containerd/cgroups"
-	"github.com/nsf/termbox-go"
+	"github.com/gizak/termui"
+	"github.com/k1LoW/cgrps/util"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh/terminal"
 	"io/ioutil"
 	"os"
 	"strings"
-	"sync"
-	"time"
 )
 
 // statCmd represents the stat command
@@ -48,110 +47,115 @@ var statCmd = &cobra.Command{
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		var c string
+		var cpath string
 
 		if terminal.IsTerminal(0) {
-			c = args[0]
+			cpath = args[0]
 		} else {
 			b, _ := ioutil.ReadAll(os.Stdin)
-			c = strings.TrimRight(string(b), "\n")
+			cpath = strings.TrimRight(string(b), "\n")
 		}
 
-		err := termbox.Init()
-		if err != nil {
-			panic(err)
-		}
-		defer termbox.Close()
+		h := util.Hierarchy(cpath)
 
-		sch := make(chan bool)
-		kch := make(chan termbox.Key)
-		tch := make(chan bool)
-
-		go drawLoop(sch, c)
-		go keyEventLoop(kch)
-		go timerLoop(tch)
-
-		termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
-
-		for {
-			select {
-			case key := <-kch:
-				mu.Lock()
-				switch key {
-				case termbox.KeyEsc, termbox.KeyCtrlC:
-					mu.Unlock()
-					return
-				}
-				mu.Unlock()
-				sch <- true
-				break
-			case <-tch:
-				mu.Lock()
-				mu.Unlock()
-				sch <- true
-				break
-			default:
-				break
-			}
-		}
-
-	},
-}
-
-var mu sync.Mutex
-var timeSpan int = 1000 // ms
-
-func timerLoop(tch chan bool) {
-	for {
-		tch <- true
-		time.Sleep(time.Duration(timeSpan) * time.Millisecond)
-	}
-}
-
-func keyEventLoop(kch chan termbox.Key) {
-	for {
-		switch ev := termbox.PollEvent(); ev.Type {
-		case termbox.EventKey:
-			kch <- ev.Key
-		default:
-		}
-	}
-}
-
-func drawLine(x, y int, str string) {
-	color := termbox.ColorDefault
-	backgroundColor := termbox.ColorDefault
-	runes := []rune(str)
-
-	for i := 0; i < len(runes); i += 1 {
-		termbox.SetCell(x+i, y, runes[i], color, backgroundColor)
-	}
-}
-
-func drawLoop(sch chan bool, c string) {
-	h := hierarchy(c)
-
-	control, err := cgroups.Load(h, cgroups.StaticPath(c))
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
-	for {
-		<-sch
-		mu.Lock()
-		termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
-		stats, err := control.Stat(cgroups.IgnoreNotExist)
+		// debug
+		control, err := cgroups.Load(h, cgroups.StaticPath(cpath))
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		drawLine(0, 0, "Press ESC to exit.")
-		drawLine(2, 1, fmt.Sprintf("%s", c))
-		drawLine(2, 2, fmt.Sprintf("%v", stats))
-		termbox.Flush()
-		mu.Unlock()
+		stats, err := control.Stat(cgroups.IgnoreNotExist)
+		subsys := control.Subsystems()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		fmt.Printf("%s\n", stats)
+		fmt.Printf("%s\n", subsys)
+		// os.Exit(1) // /debug
+
+		err = termui.Init()
+		if err != nil {
+			panic(err)
+		}
+		defer termui.Close()
+
+		cgroupLabel, cgroupData := NewCgroupStat(cpath)
+
+		cpuTitle, cpuLabel, cpuData := NewCpuStat()
+
+		termui.Body.AddRows(
+			termui.NewRow(
+				termui.NewCol(2, 0, cgroupLabel),
+				termui.NewCol(4, 0, cgroupData),
+			),
+			termui.NewRow(
+				termui.NewCol(4, 0, cpuTitle),
+			),
+			termui.NewRow(
+				termui.NewCol(2, 0, cpuLabel),
+				termui.NewCol(2, 0, cpuData),
+			),
+		)
+		termui.Body.Align()
+
+		termui.Render(termui.Body)
+
+		termui.Handle("/sys/kbd/<escape>", func(termui.Event) {
+			termui.StopLoop()
+		})
+		termui.Handle("/sys/kbd/q", func(termui.Event) {
+			termui.StopLoop()
+		})
+
+		termui.Handle("/timer/1s", func(e termui.Event) {
+			DrawCgroupStat(cpath, control, cgroupLabel, cgroupData)
+			DrawCpuStat(cpath, control, cpuLabel, cpuData)
+
+			termui.Render(termui.Body)
+		})
+
+		termui.Handle("/sys/wnd/resize", func(e termui.Event) {
+			termui.Body.Width = termui.TermWidth()
+			termui.Body.Align()
+			termui.Clear()
+			termui.Render(termui.Body)
+		})
+
+		termui.Loop()
+
+	},
+}
+
+func NewCgroupStat(cpath string) (*termui.List, *termui.List) {
+	label := termui.NewList()
+	label.Border = false
+	label.ItemFgColor = termui.ColorYellow
+	label.Items = []string{
+		"  cgroup path:",
+		"  cgroup.procs:",
 	}
+	label.Height = 3
+
+	data := termui.NewList()
+	data.Border = false
+	data.Items = []string{
+		cpath, "-",
+	}
+	data.Height = 3
+
+	return label, data
+}
+
+func DrawCgroupStat(cpath string, control cgroups.Cgroup, label *termui.List, data *termui.List) {
+	subsys := control.Subsystems()
+	processes, err := control.Processes(subsys[0].Name(), true)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	// cgroup.procs
+	data.Items[1] = fmt.Sprintf("%d", len(processes)) // @todo use /sys/fs/cgroup/$/cgroup.procs directly
 }
 
 func init() {

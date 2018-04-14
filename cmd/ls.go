@@ -22,6 +22,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/k1LoW/cgrps/util"
 	"github.com/spf13/cobra"
 	"os"
 	"path/filepath"
@@ -35,7 +36,7 @@ var lsCmd = &cobra.Command{
 	Long:  `list cgroups.`,
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		subsys, err := subsystems()
+		subsys, err := util.Subsystems()
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)

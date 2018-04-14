@@ -18,15 +18,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package cmd
+package util
 
 import (
 	"fmt"
 	"github.com/containerd/cgroups"
+	"io/ioutil"
 	"os"
+	"strings"
 )
 
-func subsystems() ([]string, error) {
+func Subsystems() ([]string, error) {
 	ss := []string{}
 	subsystems, err := cgroups.V1()
 	if err != nil {
@@ -38,7 +40,7 @@ func subsystems() ([]string, error) {
 	return ss, nil
 }
 
-func hierarchy(c string) cgroups.Hierarchy {
+func Hierarchy(c string) cgroups.Hierarchy {
 	f := func() ([]cgroups.Subsystem, error) {
 		enabled := []cgroups.Subsystem{}
 		subsystems, err := cgroups.V1()
@@ -55,4 +57,23 @@ func hierarchy(c string) cgroups.Hierarchy {
 		return enabled, nil
 	}
 	return f
+}
+
+func IsEnableSubsystem(sname string, control cgroups.Cgroup) bool {
+	subsys := control.Subsystems()
+	for _, s := range subsys {
+		if string(s.Name()) == sname {
+			return true
+		}
+	}
+	return false
+}
+
+func ReadSimple(cpath string, sname string, stat string) (string, error) {
+	path := fmt.Sprintf("/sys/fs/cgroup/%s%s/%s", sname, cpath, stat)
+	val, err := ioutil.ReadFile(path)
+	if err != nil {
+		return "-", err
+	}
+	return strings.TrimRight(string(val), "\n"), nil
 }

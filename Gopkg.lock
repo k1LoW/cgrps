@@ -26,6 +26,12 @@
   version = "v1.4.7"
 
 [[projects]]
+  name = "github.com/gizak/termui"
+  packages = ["."]
+  revision = "24acd523c756fd9728824cdfac66aad9d8982fb7"
+  version = "v2.2.0"
+
+[[projects]]
   name = "github.com/godbus/dbus"
   packages = ["."]
   revision = "a389bdde4dd695d414e47b755e95e72b7826432c"
@@ -77,6 +83,12 @@
   version = "v1.7.6"
 
 [[projects]]
+  name = "github.com/maruel/panicparse"
+  packages = ["stack"]
+  revision = "785840568bdc7faa0dfb1cd6c643207f03271f64"
+  version = "v1.1.1"
+
+[[projects]]
   name = "github.com/mattn/go-runewidth"
   packages = ["."]
   revision = "9e777a8366cce605130a531d2cd6363d07ad7317"
@@ -87,6 +99,12 @@
   name = "github.com/mitchellh/go-homedir"
   packages = ["."]
   revision = "b8bc1bf767474819792c23f32d8286a45736f1c6"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/mitchellh/go-wordwrap"
+  packages = ["."]
+  revision = "ad45545899c7b13c020ea92b2072220eefad42b8"
 
 [[projects]]
   branch = "master"
@@ -194,6 +212,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "0e72695cf6908cdeb2f8484f088b4b54a11ddbd7968f377b9fe8f705c6831c1c"
+  inputs-digest = "fe2a76675a1228f1c4bb5f76c24fd9e37eec8b6028e7c4d7d5106673db4b631c"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -24,6 +24,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/containerd/cgroups"
+	"github.com/k1LoW/cgrps/util"
 	"github.com/k1LoW/go-ps"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh/terminal"
@@ -47,18 +48,18 @@ var psCmd = &cobra.Command{
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		var c string
+		var cpath string
 
 		if terminal.IsTerminal(0) {
-			c = args[0]
+			cpath = args[0]
 		} else {
 			b, _ := ioutil.ReadAll(os.Stdin)
-			c = strings.TrimRight(string(b), "\n")
+			cpath = strings.TrimRight(string(b), "\n")
 		}
 
-		h := hierarchy(c)
+		h := util.Hierarchy(cpath)
 
-		control, err := cgroups.Load(h, cgroups.StaticPath(c))
+		control, err := cgroups.Load(h, cgroups.StaticPath(cpath))
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
