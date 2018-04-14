@@ -83,6 +83,7 @@ var statCmd = &cobra.Command{
 		cgroupLabel, cgroupData := NewCgroupStat(cpath)
 
 		cpuTitle, cpuLabel, cpuData := NewCpuStat()
+		memoryTitle, memoryLabel, memoryData := NewMemoryStat()
 
 		termui.Body.AddRows(
 			termui.NewRow(
@@ -90,11 +91,14 @@ var statCmd = &cobra.Command{
 				termui.NewCol(4, 0, cgroupData),
 			),
 			termui.NewRow(
-				termui.NewCol(4, 0, cpuTitle),
+				termui.NewCol(2, 0, cpuTitle),
+				termui.NewCol(2, 2, memoryTitle),
 			),
 			termui.NewRow(
 				termui.NewCol(2, 0, cpuLabel),
 				termui.NewCol(2, 0, cpuData),
+				termui.NewCol(2, 0, memoryLabel),
+				termui.NewCol(2, 0, memoryData),
 			),
 		)
 		termui.Body.Align()
@@ -111,6 +115,7 @@ var statCmd = &cobra.Command{
 		termui.Handle("/timer/1s", func(e termui.Event) {
 			DrawCgroupStat(cpath, control, cgroupLabel, cgroupData)
 			DrawCpuStat(cpath, control, cpuLabel, cpuData)
+			DrawMemoryStat(cpath, control, memoryLabel, memoryData)
 
 			termui.Render(termui.Body)
 		})

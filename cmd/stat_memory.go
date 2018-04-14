@@ -21,16 +21,16 @@
 package cmd
 
 import (
+	"bufio"
 	"fmt"
 	"github.com/containerd/cgroups"
 	"github.com/gizak/termui"
 	"github.com/k1LoW/cgrps/util"
-	"os"
 	"strings"
 )
 
-func NewCpuStat() (*termui.Par, *termui.List, *termui.List) {
-	title := termui.NewPar("CPU")
+func NewMemoryStat() (*termui.Par, *termui.List, *termui.List) {
+	title := termui.NewPar("MEMORY")
 	title.Height = 1
 	title.Border = false
 
@@ -48,29 +48,24 @@ func NewCpuStat() (*termui.Par, *termui.List, *termui.List) {
 	return title, label, data
 }
 
-var cgroupCPU = []string{
-	"cpu.cfs_period_us",
-	"cpu.cfs_quota_us",
-	"cpu.rt_period_us",
-	"cpu.rt_runtime_us",
-	"cpu.shares",
-	"cpuset.cpus",
-	"cpuset.mems",
+var cgroupMemory = []string{
+	"memory.usage_in_bytes",
+	"memory.memsw.usage_in_bytes",
+	"memory.max_usage_in_bytes",
+	"memory.memsw.max_usage_in_bytes",
+	"memory.limit_in_bytes",
+	"memory.memsw.limit_in_bytes",
 }
 
-func DrawCpuStat(cpath string, control cgroups.Cgroup, label *termui.List, data *termui.List) {
-	if !util.IsEnableSubsystem("cpu", control) {
+func DrawMemoryStat(cpath string, control cgroups.Cgroup, label *termui.List, data *termui.List) {
+	if !util.IsEnableSubsystem("memory", control) {
 		return
 	}
-	stats, err := control.Stat(cgroups.IgnoreNotExist)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+
 	d := []string{}
 
-	// cgroupCPU
-	for _, s := range cgroupCPU {
+	// cgroupMemory
+	for _, s := range cgroupMemory {
 		splited := strings.SplitN(s, ".", 2)
 		val, err := util.ReadSimple(cpath, splited[0], s)
 		if err == nil {
@@ -78,26 +73,41 @@ func DrawCpuStat(cpath string, control cgroups.Cgroup, label *termui.List, data 
 			d = append(d, fmt.Sprintf("%v", val))
 		}
 	}
-	// cpuacct.stat.user
-	d = append(d, fmt.Sprintf("%v", stats.CPU.Usage.User))
-	label.Items = append(label.Items, "cpuacct.stat.user:")
-	// cpuacct.stat.system
-	d = append(d, fmt.Sprintf("%v", stats.CPU.Usage.Kernel))
-	label.Items = append(label.Items, "cpuacct.stat.system:")
-	// cpuacct.usage
-	d = append(d, fmt.Sprintf("%v", stats.CPU.Usage.Total))
-	label.Items = append(label.Items, "cpuacct.usage:")
-	// cpuacct.usage_percpu
-	// d = append(d, fmt.Sprintf("%v", stats.CPU.Usage.PerCPU))
-	// cpu.stat.nr_periods
-	d = append(d, fmt.Sprintf("%v", stats.CPU.Throttling.Periods))
-	label.Items = append(label.Items, "cpu.stat.nr_periods:")
-	// cpu.stat.nr_throttled
-	d = append(d, fmt.Sprintf("%v", stats.CPU.Throttling.ThrottledPeriods))
-	label.Items = append(label.Items, "cpu.stat.nr_throttled:")
-	// cpu.stat.throttled_time
-	d = append(d, fmt.Sprintf("%v", stats.CPU.Throttling.ThrottledTime))
-	label.Items = append(label.Items, "cpu.stat.throttled_time:")
+
+	// memoty.stat
+	stat, err := util.ReadSimple(cpath, "memory", "memory.stat")
+	if err == nil {
+		in := strings.NewReader(stat)
+		scanner := bufio.NewScanner(in)
+
+		stats := make(map[string]string)
+		lines := []string{}
+		for scanner.Scan() {
+			line := scanner.Text()
+			splited := strings.SplitN(line, " ", 2)
+			k := splited[0]
+			v := splited[1]
+			if strings.Index(k, "total_") == 0 {
+				k = strings.Replace(k, "total_", "", 1)
+				stats[k] = v
+			} else {
+				lines = append(lines, line)
+			}
+		}
+
+		for _, l := range lines {
+			splited := strings.SplitN(l, " ", 2)
+			k := splited[0]
+			v := splited[1]
+			if total, ok := stats[k]; ok {
+				d = append(d, fmt.Sprintf("%v/%v", v, total))
+			} else {
+				d = append(d, fmt.Sprintf("%v", v))
+			}
+			label.Items = append(label.Items, fmt.Sprintf("memory.stat.%s:", k))
+		}
+
+	}
 
 	maxlen := 1
 	for _, v := range d {
