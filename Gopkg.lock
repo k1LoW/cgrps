@@ -20,6 +20,12 @@
   version = "v0.3.3"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/dustin/go-humanize"
+  packages = ["."]
+  revision = "bb3d318650d48840a39aa21a027c6630e198e626"
+
+[[projects]]
   name = "github.com/fsnotify/fsnotify"
   packages = ["."]
   revision = "c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9"
@@ -212,6 +218,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "fe2a76675a1228f1c4bb5f76c24fd9e37eec8b6028e7c4d7d5106673db4b631c"
+  inputs-digest = "cfd943d73bce642a9809ca370dc07289f99f8429b492ff923e77355e8c88f184"
   solver-name = "gps-cdcl"
   solver-version = 1
