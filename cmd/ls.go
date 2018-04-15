@@ -32,7 +32,7 @@ import (
 // lsCmd represents the ls command
 var lsCmd = &cobra.Command{
 	Use:   "ls",
-	Short: "list cgroups",
+	Short: "list cgroups.",
 	Long:  `list cgroups.`,
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {

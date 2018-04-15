@@ -36,8 +36,8 @@ import (
 // statCmd represents the stat command
 var statCmd = &cobra.Command{
 	Use:   "stat [CGROUP]",
-	Short: "cgroup stat",
-	Long:  `cgroup stat.`,
+	Short: "show current cgroups stats.",
+	Long:  `show current cgroups stats.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if terminal.IsTerminal(0) {
 			if len(args) < 1 {
