@@ -23,8 +23,10 @@ package util
 import (
 	"fmt"
 	"github.com/containerd/cgroups"
+	"github.com/dustin/go-humanize"
 	"io/ioutil"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -75,5 +77,17 @@ func ReadSimple(cpath string, sname string, stat string) (string, error) {
 	if err != nil {
 		return "-", err
 	}
-	return strings.TrimRight(string(val), "\n"), nil
+	str := strings.TrimRight(string(val), "\n")
+	if str == "" {
+		str = "-"
+	}
+	return str, nil
+}
+
+func Bytes(v string) string {
+	parsed, err := strconv.ParseUint(v, 10, 64)
+	if err != nil {
+		return v
+	}
+	return humanize.Bytes(parsed)
 }

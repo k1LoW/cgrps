@@ -80,12 +80,19 @@ var statCmd = &cobra.Command{
 		}
 		defer termui.Close()
 
+		title := termui.NewPar("stat")
+		title.Height = 1
+		title.Border = false
 		cgroupLabel, cgroupData := NewCgroupStat(cpath)
 
 		cpuTitle, cpuLabel, cpuData := NewCpuStat()
 		memoryTitle, memoryLabel, memoryData := NewMemoryStat()
+		blkioTitle, blkioLabel, blkioData := NewBlkioStat()
 
 		termui.Body.AddRows(
+			termui.NewRow(
+				termui.NewCol(2, 0, title),
+			),
 			termui.NewRow(
 				termui.NewCol(2, 0, cgroupLabel),
 				termui.NewCol(4, 0, cgroupData),
@@ -93,12 +100,15 @@ var statCmd = &cobra.Command{
 			termui.NewRow(
 				termui.NewCol(2, 0, cpuTitle),
 				termui.NewCol(2, 2, memoryTitle),
+				termui.NewCol(2, 2, blkioTitle),
 			),
 			termui.NewRow(
 				termui.NewCol(2, 0, cpuLabel),
 				termui.NewCol(2, 0, cpuData),
 				termui.NewCol(2, 0, memoryLabel),
 				termui.NewCol(2, 0, memoryData),
+				termui.NewCol(2, 0, blkioLabel),
+				termui.NewCol(2, 0, blkioData),
 			),
 		)
 		termui.Body.Align()
@@ -116,6 +126,7 @@ var statCmd = &cobra.Command{
 			DrawCgroupStat(cpath, control, cgroupLabel, cgroupData)
 			DrawCpuStat(cpath, control, cpuLabel, cpuData)
 			DrawMemoryStat(cpath, control, memoryLabel, memoryData)
+			DrawBlkioStat(cpath, control, blkioLabel, blkioData)
 
 			termui.Render(termui.Body)
 		})

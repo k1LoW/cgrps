@@ -4,7 +4,7 @@
 
 `cgrps` is a set of commands for checking cgroups.
 
-# Usage
+## Usage
 
 `cgrps` is supposed to be used with [peco](https://github.com/peco/peco) like following command,
 

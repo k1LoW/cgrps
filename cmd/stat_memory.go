@@ -70,7 +70,7 @@ func DrawMemoryStat(cpath string, control cgroups.Cgroup, label *termui.List, da
 		val, err := util.ReadSimple(cpath, splited[0], s)
 		if err == nil {
 			label.Items = append(label.Items, fmt.Sprintf("%s:", s))
-			d = append(d, fmt.Sprintf("%v", val))
+			d = append(d, fmt.Sprintf("%v", util.Bytes(val)))
 		}
 	}
 
@@ -100,9 +100,17 @@ func DrawMemoryStat(cpath string, control cgroups.Cgroup, label *termui.List, da
 			k := splited[0]
 			v := splited[1]
 			if total, ok := stats[k]; ok {
-				d = append(d, fmt.Sprintf("%v/%v", v, total))
+				if strings.Index(k, "pgpg") == 0 {
+					d = append(d, fmt.Sprintf("%v / %v", v, total))
+				} else {
+					d = append(d, fmt.Sprintf("%v / %v", util.Bytes(v), util.Bytes(total)))
+				}
 			} else {
-				d = append(d, fmt.Sprintf("%v", v))
+				if strings.Index(k, "pgpg") == 0 {
+					d = append(d, fmt.Sprintf("%v", v))
+				} else {
+					d = append(d, fmt.Sprintf("%v", util.Bytes(v)))
+				}
 			}
 			label.Items = append(label.Items, fmt.Sprintf("memory.stat.%s:", k))
 		}

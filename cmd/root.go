@@ -34,8 +34,8 @@ var cfgFile string
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "cgrps",
-	Short: "cgroups utility command",
-	Long:  `cgroups utility command`,
+	Short: "cgrps is a set of commands for checking cgroups.",
+	Long:  `cgrps is a set of commands for checking cgroups.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	//	Run: func(cmd *cobra.Command, args []string) { },

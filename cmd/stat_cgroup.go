@@ -30,7 +30,7 @@ import (
 func NewCgroupStat(cpath string) (*termui.List, *termui.List) {
 	label := termui.NewList()
 	label.Border = false
-	label.ItemFgColor = termui.ColorYellow
+	label.ItemFgColor = termui.ColorGreen
 	label.Items = []string{
 		"  cgroup path:",
 		"  cgroup.procs:",
