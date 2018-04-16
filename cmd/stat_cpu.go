@@ -29,7 +29,12 @@ import (
 	"strings"
 )
 
-func NewCpuStat() (*termui.Par, *termui.List, *termui.List) {
+type CPUStat struct {
+	Items map[string]uint64
+}
+
+// NewCPUStat ...
+func NewCPUStat() (*termui.Par, *termui.List, *termui.List, *CPUStat) {
 	title := termui.NewPar("CPU")
 	title.Height = 1
 	title.Border = false
@@ -45,7 +50,10 @@ func NewCpuStat() (*termui.Par, *termui.List, *termui.List) {
 	data.Items = []string{}
 	data.Height = len(label.Items)
 
-	return title, label, data
+	total := CPUStat{}
+	total.Items = make(map[string]uint64)
+
+	return title, label, data, &total
 }
 
 var cgroupCPU = []string{
@@ -58,7 +66,8 @@ var cgroupCPU = []string{
 	"cpuset.mems",
 }
 
-func DrawCpuStat(cpath string, control cgroups.Cgroup, label *termui.List, data *termui.List) {
+// DrawCPUStat ...
+func DrawCPUStat(cpath string, control cgroups.Cgroup, label *termui.List, data *termui.List, total *CPUStat) {
 	if !util.IsEnableSubsystem("cpu", control) {
 		return
 	}
@@ -68,36 +77,82 @@ func DrawCpuStat(cpath string, control cgroups.Cgroup, label *termui.List, data 
 		os.Exit(1)
 	}
 	d := []string{}
+	var l string
+	var t uint64
+	// tick := util.ClkTck()
 
 	// cgroupCPU
 	for _, s := range cgroupCPU {
 		splited := strings.SplitN(s, ".", 2)
 		val, err := util.ReadSimple(cpath, splited[0], s)
 		if err == nil {
-			label.Items = append(label.Items, fmt.Sprintf("%s:", s))
+			l = fmt.Sprintf("%s:", s)
+			label.Items = append(label.Items, l)
 			d = append(d, fmt.Sprintf("%v", val))
 		}
 	}
 	// cpuacct.stat.user
-	d = append(d, fmt.Sprintf("%v", stats.CPU.Usage.User))
-	label.Items = append(label.Items, "cpuacct.stat.user:")
+	l = "cpuacct.stat.user:"
+	t = stats.CPU.Usage.User
+	if prev, ok := total.Items[l]; ok {
+		d = append(d, fmt.Sprintf("%v", t-prev))
+	} else {
+		d = append(d, fmt.Sprintf("%v", t))
+	}
+	total.Items[l] = t
+	label.Items = append(label.Items, l)
 	// cpuacct.stat.system
-	d = append(d, fmt.Sprintf("%v", stats.CPU.Usage.Kernel))
-	label.Items = append(label.Items, "cpuacct.stat.system:")
+	l = "cpuacct.stat.system:"
+	t = stats.CPU.Usage.Kernel
+	if prev, ok := total.Items[l]; ok {
+		d = append(d, fmt.Sprintf("%v", t-prev))
+	} else {
+		d = append(d, fmt.Sprintf("%v", t))
+	}
+	total.Items[l] = t
+	label.Items = append(label.Items, l)
 	// cpuacct.usage
-	d = append(d, fmt.Sprintf("%v", stats.CPU.Usage.Total))
-	label.Items = append(label.Items, "cpuacct.usage:")
+	l = "cpuacct.usage:"
+	t = stats.CPU.Usage.Total
+	if prev, ok := total.Items[l]; ok {
+		d = append(d, fmt.Sprintf("%v", t-prev))
+	} else {
+		d = append(d, fmt.Sprintf("%v", t))
+	}
+	total.Items[l] = t
+	label.Items = append(label.Items, l)
 	// cpuacct.usage_percpu
 	// d = append(d, fmt.Sprintf("%v", stats.CPU.Usage.PerCPU))
 	// cpu.stat.nr_periods
-	d = append(d, fmt.Sprintf("%v", stats.CPU.Throttling.Periods))
-	label.Items = append(label.Items, "cpu.stat.nr_periods:")
+	l = "cpu.stat.nr_periods:"
+	t = stats.CPU.Throttling.Periods
+	if prev, ok := total.Items[l]; ok {
+		d = append(d, fmt.Sprintf("%v", t-prev))
+	} else {
+		d = append(d, fmt.Sprintf("%v", t))
+	}
+	total.Items[l] = t
+	label.Items = append(label.Items, l)
 	// cpu.stat.nr_throttled
-	d = append(d, fmt.Sprintf("%v", stats.CPU.Throttling.ThrottledPeriods))
-	label.Items = append(label.Items, "cpu.stat.nr_throttled:")
+	l = "cpu.stat.nr_throttled:"
+	t = stats.CPU.Throttling.ThrottledPeriods
+	if prev, ok := total.Items[l]; ok {
+		d = append(d, fmt.Sprintf("%v", t-prev))
+	} else {
+		d = append(d, fmt.Sprintf("%v", t))
+	}
+	total.Items[l] = t
+	label.Items = append(label.Items, l)
 	// cpu.stat.throttled_time
-	d = append(d, fmt.Sprintf("%v", stats.CPU.Throttling.ThrottledTime))
-	label.Items = append(label.Items, "cpu.stat.throttled_time:")
+	l = "cpu.stat.throttled_time:"
+	t = stats.CPU.Throttling.ThrottledTime
+	if prev, ok := total.Items[l]; ok {
+		d = append(d, fmt.Sprintf("%v", t-prev))
+	} else {
+		d = append(d, fmt.Sprintf("%v", t))
+	}
+	total.Items[l] = t
+	label.Items = append(label.Items, l)
 
 	maxlen := 1
 	for _, v := range d {

@@ -86,7 +86,7 @@ var statCmd = &cobra.Command{
 		title.Border = false
 		cgroupLabel, cgroupData := NewCgroupStat(cpath)
 
-		cpuTitle, cpuLabel, cpuData := NewCpuStat()
+		cpuTitle, cpuLabel, cpuData, cpuDataTotal := NewCPUStat()
 		memoryTitle, memoryLabel, memoryData := NewMemoryStat()
 		blkioTitle, blkioLabel, blkioData := NewBlkioStat()
 
@@ -125,7 +125,7 @@ var statCmd = &cobra.Command{
 
 		termui.Handle("/timer/1s", func(e termui.Event) {
 			DrawCgroupStat(cpath, control, cgroupLabel, cgroupData)
-			DrawCpuStat(cpath, control, cpuLabel, cpuData)
+			DrawCPUStat(cpath, control, cpuLabel, cpuData, cpuDataTotal)
 			DrawMemoryStat(cpath, control, memoryLabel, memoryData)
 			DrawBlkioStat(cpath, control, blkioLabel, blkioData)
 

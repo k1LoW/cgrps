@@ -26,6 +26,7 @@ import (
 	"github.com/dustin/go-humanize"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"strconv"
 	"strings"
 )
@@ -90,4 +91,16 @@ func Bytes(v string) string {
 		return v
 	}
 	return humanize.Bytes(parsed)
+}
+
+func ClkTck() float64 {
+	tck := float64(128)
+	out, err := exec.Command("/usr/bin/getconf", "CLK_TCK").Output()
+	if err == nil {
+		i, err := strconv.ParseFloat(string(out), 64)
+		if err == nil {
+			tck = float64(i)
+		}
+	}
+	return tck
 }
