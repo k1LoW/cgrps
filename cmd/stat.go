@@ -50,29 +50,30 @@ var statCmd = &cobra.Command{
 		var cpath string
 
 		if terminal.IsTerminal(0) {
-			cpath = args[0]
+			cpath = "/" + args[0]
 		} else {
 			b, _ := ioutil.ReadAll(os.Stdin)
-			cpath = strings.TrimRight(string(b), "\n")
+			cpath = "/" + strings.TrimRight(string(b), "\n")
 		}
 
 		h := util.Hierarchy(cpath)
 
-		// debug
 		control, err := cgroups.Load(h, cgroups.StaticPath(cpath))
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		stats, err := control.Stat(cgroups.IgnoreNotExist)
-		subsys := control.Subsystems()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		fmt.Printf("%s\n", stats)
-		fmt.Printf("%s\n", subsys)
-		// os.Exit(1) // /debug
+
+		// debug
+		// stats, err := control.Stat(cgroups.IgnoreNotExist)
+		// subsys := control.Subsystems()
+		// if err != nil {
+		// 	fmt.Println(err)
+		// 	os.Exit(1)
+		// }
+		// fmt.Printf("%s\n", stats)
+		// fmt.Printf("%s\n", subsys)
+		// os.Exit(1)
 
 		err = termui.Init()
 		if err != nil {

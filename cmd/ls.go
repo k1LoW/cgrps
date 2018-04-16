@@ -50,7 +50,7 @@ var lsCmd = &cobra.Command{
 
 			err := filepath.Walk(searchDir, func(path string, f os.FileInfo, err error) error {
 				if f.IsDir() {
-					c := strings.Replace(path, searchDir, "", 1)
+					c := strings.Replace(strings.Replace(path, searchDir, "", 1), "/", "", 1)
 					if c != "" && !encountered[c] {
 						encountered[c] = true
 						cs = append(cs, c)
