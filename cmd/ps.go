@@ -51,10 +51,10 @@ var psCmd = &cobra.Command{
 		var cpath string
 
 		if terminal.IsTerminal(0) {
-			cpath = "/" + args[0]
+			cpath = args[0]
 		} else {
 			b, _ := ioutil.ReadAll(os.Stdin)
-			cpath = "/" + strings.TrimRight(string(b), "\n")
+			cpath = strings.TrimRight(string(b), "\n")
 		}
 
 		h := util.Hierarchy(cpath)
