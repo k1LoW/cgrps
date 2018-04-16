@@ -12,6 +12,12 @@
 $ cgrps ps $(cgrps ls | peco)
 ```
 
+or
+
+```sh
+$ cgrps ls | grep user.slice | head -1 |  cgrps ps
+```
+
 ## Commands
 
 ### `cgrps ls`
@@ -22,6 +28,6 @@ list cgroups.
 
 report a snapshot of the current cgroups processes.
 
-### `cgrps stat`
+### `cgrps stat [CGROUP]`
 
 show current cgroups stats.
