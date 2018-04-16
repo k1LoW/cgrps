@@ -21,11 +21,12 @@
 package cmd
 
 import (
+	"bufio"
 	"fmt"
 	"github.com/containerd/cgroups"
 	"github.com/gizak/termui"
 	"github.com/k1LoW/cgrps/util"
-	"os"
+	"strconv"
 	"strings"
 )
 
@@ -33,7 +34,7 @@ type CPUStat struct {
 	Items map[string]uint64
 }
 
-// NewCPUStat ...
+// NewCPUStat create new CPU stat vals
 func NewCPUStat() (*termui.Par, *termui.List, *termui.List, *CPUStat) {
 	title := termui.NewPar("CPU")
 	title.Height = 1
@@ -66,20 +67,16 @@ var cgroupCPU = []string{
 	"cpuset.mems",
 }
 
-// DrawCPUStat ...
+// DrawCPUStat gather CPU stat vals and set
 func DrawCPUStat(cpath string, control cgroups.Cgroup, label *termui.List, data *termui.List, total *CPUStat) {
 	if !util.IsEnableSubsystem("cpu", control) {
 		return
 	}
-	stats, err := control.Stat(cgroups.IgnoreNotExist)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+
 	d := []string{}
 	var l string
 	var t uint64
-	// tick := util.ClkTck()
+	tick := util.ClkTck()
 
 	// cgroupCPU
 	for _, s := range cgroupCPU {
@@ -91,68 +88,75 @@ func DrawCPUStat(cpath string, control cgroups.Cgroup, label *termui.List, data 
 			d = append(d, fmt.Sprintf("%v", val))
 		}
 	}
-	// cpuacct.stat.user
-	l = "cpuacct.stat.user:"
-	t = stats.CPU.Usage.User
-	if prev, ok := total.Items[l]; ok {
-		d = append(d, fmt.Sprintf("%v", t-prev))
-	} else {
-		d = append(d, fmt.Sprintf("%v", t))
+
+	// cpuacct.stat
+	stat, err := util.ReadSimple(cpath, "cpu", "cpuacct.stat")
+	if err == nil {
+		in := strings.NewReader(stat)
+		scanner := bufio.NewScanner(in)
+
+		for scanner.Scan() {
+			line := scanner.Text()
+			splited := strings.SplitN(line, " ", 2)
+			k := splited[0]
+			v := splited[1]
+			l = fmt.Sprintf("cpuacct.stat.%s:", k)
+			t, err = strconv.ParseUint(v, 10, 64)
+			if err != nil {
+				panic(err)
+			}
+			if prev, ok := total.Items[l]; ok {
+				d = append(d, fmt.Sprintf("%v sec", float64(t-prev)/tick))
+			} else {
+				d = append(d, fmt.Sprintf("%v sec", float64(t)/tick))
+			}
+			total.Items[l] = t
+			label.Items = append(label.Items, l)
+		}
 	}
-	total.Items[l] = t
-	label.Items = append(label.Items, l)
-	// cpuacct.stat.system
-	l = "cpuacct.stat.system:"
-	t = stats.CPU.Usage.Kernel
-	if prev, ok := total.Items[l]; ok {
-		d = append(d, fmt.Sprintf("%v", t-prev))
-	} else {
-		d = append(d, fmt.Sprintf("%v", t))
-	}
-	total.Items[l] = t
-	label.Items = append(label.Items, l)
+
 	// cpuacct.usage
+	v, err := util.ReadSimple(cpath, "cpu", "cpuacct.usage")
 	l = "cpuacct.usage:"
-	t = stats.CPU.Usage.Total
+	t, err = strconv.ParseUint(v, 10, 64)
+	if err != nil {
+		panic(err)
+	}
 	if prev, ok := total.Items[l]; ok {
-		d = append(d, fmt.Sprintf("%v", t-prev))
+		d = append(d, fmt.Sprintf("%v nsec", t-prev))
 	} else {
-		d = append(d, fmt.Sprintf("%v", t))
+		d = append(d, fmt.Sprintf("%v nsec", t))
 	}
 	total.Items[l] = t
 	label.Items = append(label.Items, l)
+
 	// cpuacct.usage_percpu
-	// d = append(d, fmt.Sprintf("%v", stats.CPU.Usage.PerCPU))
-	// cpu.stat.nr_periods
-	l = "cpu.stat.nr_periods:"
-	t = stats.CPU.Throttling.Periods
-	if prev, ok := total.Items[l]; ok {
-		d = append(d, fmt.Sprintf("%v", t-prev))
-	} else {
-		d = append(d, fmt.Sprintf("%v", t))
+
+	// cpu.stat
+	stat, err = util.ReadSimple(cpath, "cpu", "cpu.stat")
+	if err == nil {
+		in := strings.NewReader(stat)
+		scanner := bufio.NewScanner(in)
+
+		for scanner.Scan() {
+			line := scanner.Text()
+			splited := strings.SplitN(line, " ", 2)
+			k := splited[0]
+			v := splited[1]
+			l = fmt.Sprintf("cpu.stat.%s:", k)
+			t, err = strconv.ParseUint(v, 10, 64)
+			if err != nil {
+				panic(err)
+			}
+			if prev, ok := total.Items[l]; ok {
+				d = append(d, fmt.Sprintf("%v", t-prev))
+			} else {
+				d = append(d, fmt.Sprintf("%v", t))
+			}
+			total.Items[l] = t
+			label.Items = append(label.Items, l)
+		}
 	}
-	total.Items[l] = t
-	label.Items = append(label.Items, l)
-	// cpu.stat.nr_throttled
-	l = "cpu.stat.nr_throttled:"
-	t = stats.CPU.Throttling.ThrottledPeriods
-	if prev, ok := total.Items[l]; ok {
-		d = append(d, fmt.Sprintf("%v", t-prev))
-	} else {
-		d = append(d, fmt.Sprintf("%v", t))
-	}
-	total.Items[l] = t
-	label.Items = append(label.Items, l)
-	// cpu.stat.throttled_time
-	l = "cpu.stat.throttled_time:"
-	t = stats.CPU.Throttling.ThrottledTime
-	if prev, ok := total.Items[l]; ok {
-		d = append(d, fmt.Sprintf("%v", t-prev))
-	} else {
-		d = append(d, fmt.Sprintf("%v", t))
-	}
-	total.Items[l] = t
-	label.Items = append(label.Items, l)
 
 	maxlen := 1
 	for _, v := range d {
