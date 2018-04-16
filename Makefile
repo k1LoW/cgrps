@@ -18,7 +18,7 @@ depsdev:
 build:
 	go build -ldflags="$(BUILD_LDFLAGS)"
 
-crossbuild: depsdev
+crossbuild: deps depsdev
 	$(eval ver = v$(shell gobump show -r))
 	goxz -pv=$(ver) -os=linux -arch=386,amd64 -build-ldflags="$(RELEASE_BUILD_LDFLAGS)" \
 	  -d=./dist/$(ver)

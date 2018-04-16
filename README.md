@@ -11,3 +11,17 @@
 ```sh
 $ cgrps ps $(cgrps ls | peco)
 ```
+
+## Commands
+
+### `cgrps ls`
+
+list cgroups.
+
+### `cgrps ps [CGROUP]`
+
+report a snapshot of the current cgroups processes.
+
+### `cgrps stat`
+
+show current cgroups stats.
