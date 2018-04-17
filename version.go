@@ -4,4 +4,4 @@ package main
 const Name string = "cgrps"
 
 // Version for this
-const Version string = "0.0.1"
+const Version string = "0.0.2"
