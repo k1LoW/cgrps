@@ -1,7 +1,5 @@
 # cgrps
 
-**!!! THIS IS STILL A WORK IN PROGRESS !!!**
-
 `cgrps` is a set of commands for checking cgroups.
 
 ## Usage
@@ -30,4 +28,4 @@ report a snapshot of the current cgroups processes.
 
 ### `cgrps stat [CGROUP]`
 
-show current cgroups stats.
+show current cgroups stats (`CPU` `MEMORY` `BLKIO`).

@@ -82,7 +82,7 @@ func DrawCPUStat(cpath string, control cgroups.Cgroup, label *termui.List, data 
 	for _, s := range cgroupCPU {
 		splited := strings.SplitN(s, ".", 2)
 		val, err := util.ReadSimple(cpath, splited[0], s)
-		if err == nil {
+		if val != "" && err == nil {
 			l = fmt.Sprintf("%s:", s)
 			label.Items = append(label.Items, l)
 			if strings.Index(l, "_us") > 0 {
@@ -92,7 +92,7 @@ func DrawCPUStat(cpath string, control cgroups.Cgroup, label *termui.List, data 
 				}
 				d = append(d, util.Usec(fval))
 			} else {
-				d = append(d, "-       ")
+				d = append(d, fmt.Sprintf("%v       ", val))
 			}
 		}
 	}

@@ -59,9 +59,9 @@ var cgroupBlkio = []string{
 	// "blkio.throttle.io_service_bytes",
 
 	"blkio.weight",
+	"blkio.weight_device",
 
 	// @todo
-	// "blkio.weight_device",
 	// "blkio.leaf_weight[_device]",
 	// "blkio.time",
 	// "blkio.sectors",
@@ -89,7 +89,7 @@ func DrawBlkioStat(cpath string, control cgroups.Cgroup, label *termui.List, dat
 	for _, s := range cgroupBlkio {
 		splited := strings.SplitN(s, ".", 2)
 		val, err := util.ReadSimple(cpath, splited[0], s)
-		if err == nil {
+		if val != "" && err == nil {
 			label.Items = append(label.Items, fmt.Sprintf("%s:", s))
 			d = append(d, fmt.Sprintf("%v", val))
 		}
