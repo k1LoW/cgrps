@@ -25,6 +25,7 @@ import (
 	"github.com/containerd/cgroups"
 	"github.com/dustin/go-humanize"
 	"io/ioutil"
+	"math"
 	"os"
 	"os/exec"
 	"strconv"
@@ -93,6 +94,16 @@ func Bytes(v string) string {
 	return humanize.Bytes(parsed)
 }
 
+func Usec(v float64) string {
+	vint := int64(v)
+	return fmt.Sprintf("%v us", humanize.Comma(vint))
+}
+
+func UsecPerSec(v float64) string {
+	vint := int64(v)
+	return fmt.Sprintf("%v us/sec", humanize.Comma(vint))
+}
+
 func ClkTck() float64 {
 	tck := float64(128)
 	out, err := exec.Command("/usr/bin/getconf", "CLK_TCK").Output()
@@ -103,4 +114,8 @@ func ClkTck() float64 {
 		}
 	}
 	return tck
+}
+
+func Round(f float64) float64 {
+	return math.Floor(f + 0.5)
 }

@@ -85,7 +85,15 @@ func DrawCPUStat(cpath string, control cgroups.Cgroup, label *termui.List, data 
 		if err == nil {
 			l = fmt.Sprintf("%s:", s)
 			label.Items = append(label.Items, l)
-			d = append(d, fmt.Sprintf("%v", val))
+			if strings.Index(l, "_us") > 0 {
+				fval, err := strconv.ParseFloat(val, 64)
+				if err != nil {
+					panic(err)
+				}
+				d = append(d, util.Usec(fval))
+			} else {
+				d = append(d, fmt.Sprintf("%v", val))
+			}
 		}
 	}
 
@@ -106,9 +114,9 @@ func DrawCPUStat(cpath string, control cgroups.Cgroup, label *termui.List, data 
 				panic(err)
 			}
 			if prev, ok := total.Items[l]; ok {
-				d = append(d, fmt.Sprintf("%v sec", float64(t-prev)/tick))
+				d = append(d, util.UsecPerSec(util.Round(float64(t-prev)/tick*1000000)))
 			} else {
-				d = append(d, fmt.Sprintf("%v sec", float64(t)/tick))
+				d = append(d, util.UsecPerSec(util.Round(float64(t)/tick*1000000)))
 			}
 			total.Items[l] = t
 			label.Items = append(label.Items, l)
@@ -123,9 +131,9 @@ func DrawCPUStat(cpath string, control cgroups.Cgroup, label *termui.List, data 
 		panic(err)
 	}
 	if prev, ok := total.Items[l]; ok {
-		d = append(d, fmt.Sprintf("%v nsec", t-prev))
+		d = append(d, util.UsecPerSec(util.Round(float64(t-prev)/1000)))
 	} else {
-		d = append(d, fmt.Sprintf("%v nsec", t))
+		d = append(d, util.UsecPerSec(util.Round(float64(t/1000))))
 	}
 	total.Items[l] = t
 	label.Items = append(label.Items, l)
@@ -149,9 +157,17 @@ func DrawCPUStat(cpath string, control cgroups.Cgroup, label *termui.List, data 
 				panic(err)
 			}
 			if prev, ok := total.Items[l]; ok {
-				d = append(d, fmt.Sprintf("%v", t-prev))
+				if strings.Index(l, "throttled_time") > 0 {
+					d = append(d, util.UsecPerSec(util.Round(float64(t-prev)/1000)))
+				} else {
+					d = append(d, fmt.Sprintf("%v", t-prev))
+				}
 			} else {
-				d = append(d, fmt.Sprintf("%v", t))
+				if strings.Index(l, "throttled_time") > 0 {
+					d = append(d, util.UsecPerSec(util.Round(float64(t)/1000)))
+				} else {
+					d = append(d, fmt.Sprintf("%v", t))
+				}
 			}
 			total.Items[l] = t
 			label.Items = append(label.Items, l)
