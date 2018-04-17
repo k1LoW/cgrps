@@ -96,7 +96,7 @@ func Bytes(v string) string {
 
 func Usec(v float64) string {
 	vint := int64(v)
-	return fmt.Sprintf("%v us", humanize.Comma(vint))
+	return fmt.Sprintf("%v us    ", humanize.Comma(vint))
 }
 
 func UsecPerSec(v float64) string {

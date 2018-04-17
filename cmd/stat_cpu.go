@@ -92,7 +92,7 @@ func DrawCPUStat(cpath string, control cgroups.Cgroup, label *termui.List, data 
 				}
 				d = append(d, util.Usec(fval))
 			} else {
-				d = append(d, fmt.Sprintf("%v", val))
+				d = append(d, "-       ")
 			}
 		}
 	}
@@ -116,7 +116,7 @@ func DrawCPUStat(cpath string, control cgroups.Cgroup, label *termui.List, data 
 			if prev, ok := total.Items[l]; ok {
 				d = append(d, util.UsecPerSec(util.Round(float64(t-prev)/tick*1000000)))
 			} else {
-				d = append(d, util.UsecPerSec(util.Round(float64(t)/tick*1000000)))
+				d = append(d, "-       ")
 			}
 			total.Items[l] = t
 			label.Items = append(label.Items, l)
@@ -133,7 +133,7 @@ func DrawCPUStat(cpath string, control cgroups.Cgroup, label *termui.List, data 
 	if prev, ok := total.Items[l]; ok {
 		d = append(d, util.UsecPerSec(util.Round(float64(t-prev)/1000)))
 	} else {
-		d = append(d, util.UsecPerSec(util.Round(float64(t/1000))))
+		d = append(d, "-       ")
 	}
 	total.Items[l] = t
 	label.Items = append(label.Items, l)
@@ -160,14 +160,10 @@ func DrawCPUStat(cpath string, control cgroups.Cgroup, label *termui.List, data 
 				if strings.Index(l, "throttled_time") > 0 {
 					d = append(d, util.UsecPerSec(util.Round(float64(t-prev)/1000)))
 				} else {
-					d = append(d, fmt.Sprintf("%v", t-prev))
+					d = append(d, fmt.Sprintf("%v       ", t-prev))
 				}
 			} else {
-				if strings.Index(l, "throttled_time") > 0 {
-					d = append(d, util.UsecPerSec(util.Round(float64(t)/1000)))
-				} else {
-					d = append(d, fmt.Sprintf("%v", t))
-				}
+				d = append(d, "-       ")
 			}
 			total.Items[l] = t
 			label.Items = append(label.Items, l)
