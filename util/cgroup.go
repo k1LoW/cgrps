@@ -67,6 +67,34 @@ func IsEnableSubsystem(cpath string, sname string) bool {
 	return true
 }
 
+func Cgroups() ([]string, error) {
+	subsys := EnabledSubsystems("/")
+
+	cs := []string{}
+	encountered := make(map[string]bool)
+
+	for _, s := range subsys {
+		searchDir := fmt.Sprintf("/sys/fs/cgroup/%s", s)
+
+		err := filepath.Walk(searchDir, func(path string, f os.FileInfo, err error) error {
+			if f.IsDir() {
+				c := strings.Replace(path, searchDir, "", 1)
+				if c != "" && !encountered[c] {
+					encountered[c] = true
+					cs = append(cs, c)
+				}
+			}
+			return nil
+		})
+
+		if err != nil {
+			return cs, err
+		}
+	}
+
+	return cs, nil
+}
+
 func ReadSimple(cpath string, sname string, stat string) (string, error) {
 	path := fmt.Sprintf("/sys/fs/cgroup/%s%s/%s", sname, cpath, stat)
 	val, err := ioutil.ReadFile(path)

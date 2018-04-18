@@ -23,7 +23,6 @@ package cmd
 import (
 	"errors"
 	"github.com/gizak/termui"
-	// "github.com/k1LoW/cgrps/util"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh/terminal"
 	"io/ioutil"

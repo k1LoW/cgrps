@@ -25,8 +25,6 @@ import (
 	"github.com/k1LoW/cgrps/util"
 	"github.com/spf13/cobra"
 	"os"
-	"path/filepath"
-	"strings"
 )
 
 // lsCmd represents the ls command
@@ -36,29 +34,10 @@ var lsCmd = &cobra.Command{
 	Long:  `list cgroups.`,
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		subsys := util.EnabledSubsystems("/")
-
-		cs := []string{}
-		encountered := make(map[string]bool)
-
-		for _, s := range subsys {
-			searchDir := fmt.Sprintf("/sys/fs/cgroup/%s", s)
-
-			err := filepath.Walk(searchDir, func(path string, f os.FileInfo, err error) error {
-				if f.IsDir() {
-					c := strings.Replace(path, searchDir, "", 1)
-					if c != "" && !encountered[c] {
-						encountered[c] = true
-						cs = append(cs, c)
-					}
-				}
-				return nil
-			})
-
-			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
-			}
+		cs, err := util.Cgroups()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
 		}
 
 		for _, c := range cs {
