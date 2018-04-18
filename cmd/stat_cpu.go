@@ -36,7 +36,7 @@ type CPUStat struct {
 
 // NewCPUStat create new CPU stat vals
 func NewCPUStat() (*termui.Par, *termui.List, *termui.List, *CPUStat) {
-	title := termui.NewPar("CPU")
+	title := termui.NewPar("CPU/CPUSet/CPUAcct")
 	title.Height = 1
 	title.Border = false
 
