@@ -27,6 +27,7 @@ import (
 	"strconv"
 )
 
+// Bytes convert string numeric to a human readable "byte".
 func Bytes(v string) string {
 	parsed, err := strconv.ParseUint(v, 10, 64)
 	if err != nil {
@@ -35,16 +36,19 @@ func Bytes(v string) string {
 	return humanize.Bytes(parsed)
 }
 
+// Usec convert float64 to a human readable "microseconds"
 func Usec(v float64) string {
 	vint := int64(v)
 	return fmt.Sprintf("%v us    ", humanize.Comma(vint))
 }
 
+// UsecPerSec convert float64 to a human readable "microseconds/second"
 func UsecPerSec(v float64) string {
 	vint := int64(v)
 	return fmt.Sprintf("%v us/sec", humanize.Comma(vint))
 }
 
+// Round ...
 func Round(f float64) float64 {
 	return math.Floor(f + 0.5)
 }
