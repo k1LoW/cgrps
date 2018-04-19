@@ -3,24 +3,6 @@
 
 [[projects]]
   branch = "master"
-  name = "github.com/containerd/cgroups"
-  packages = ["."]
-  revision = "07683a668a6c20f509112ea932da7e4ca98c7c3f"
-
-[[projects]]
-  name = "github.com/coreos/go-systemd"
-  packages = ["dbus"]
-  revision = "40e2722dffead74698ca12a750f64ef313ddce05"
-  version = "v16"
-
-[[projects]]
-  name = "github.com/docker/go-units"
-  packages = ["."]
-  revision = "47565b4f722fb6ceae66b95f853feed578a4a51c"
-  version = "v0.3.3"
-
-[[projects]]
-  branch = "master"
   name = "github.com/dustin/go-humanize"
   packages = ["."]
   revision = "bb3d318650d48840a39aa21a027c6630e198e626"
@@ -36,22 +18,6 @@
   packages = ["."]
   revision = "24acd523c756fd9728824cdfac66aad9d8982fb7"
   version = "v2.2.0"
-
-[[projects]]
-  name = "github.com/godbus/dbus"
-  packages = ["."]
-  revision = "a389bdde4dd695d414e47b755e95e72b7826432c"
-  version = "v4.1.0"
-
-[[projects]]
-  name = "github.com/gogo/protobuf"
-  packages = [
-    "gogoproto",
-    "proto",
-    "protoc-gen-gogo/descriptor"
-  ]
-  revision = "1adfc126b41513cc696b209667c8656ea7aac67c"
-  version = "v1.0.0"
 
 [[projects]]
   branch = "master"
@@ -125,22 +91,10 @@
   revision = "3e24a7b6661e09b87a9f49d693034219f81602fa"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/opencontainers/runtime-spec"
-  packages = ["specs-go"]
-  revision = "a1998ecf27964b493231626886dea534e2cfadc2"
-
-[[projects]]
   name = "github.com/pelletier/go-toml"
   packages = ["."]
   revision = "acdc4509485b587f5e675510c4f2c63e90ff68a8"
   version = "v1.1.0"
-
-[[projects]]
-  name = "github.com/pkg/errors"
-  packages = ["."]
-  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
-  version = "v0.8.0"
 
 [[projects]]
   name = "github.com/spf13/afero"
@@ -218,6 +172,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "cfd943d73bce642a9809ca370dc07289f99f8429b492ff923e77355e8c88f184"
+  inputs-digest = "fcbde01f7d4a2042954195f57e31396ed250787cbf4d1563e8ed9e37e2ca2edc"
   solver-name = "gps-cdcl"
   solver-version = 1

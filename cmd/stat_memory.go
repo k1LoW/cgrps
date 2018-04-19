@@ -23,7 +23,6 @@ package cmd
 import (
 	"bufio"
 	"fmt"
-	"github.com/containerd/cgroups"
 	"github.com/gizak/termui"
 	"github.com/k1LoW/cgrps/util"
 	"strings"
@@ -57,8 +56,8 @@ var cgroupMemory = []string{
 	"memory.memsw.limit_in_bytes",
 }
 
-func DrawMemoryStat(cpath string, control cgroups.Cgroup, label *termui.List, data *termui.List) {
-	if !util.IsEnableSubsystem("memory", control) {
+func DrawMemoryStat(cpath string, label *termui.List, data *termui.List) {
+	if !util.IsEnableSubsystem(cpath, "memory") {
 		return
 	}
 

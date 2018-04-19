@@ -23,7 +23,6 @@ package cmd
 import (
 	"bufio"
 	"fmt"
-	"github.com/containerd/cgroups"
 	"github.com/gizak/termui"
 	"github.com/k1LoW/cgrps/util"
 	"strconv"
@@ -68,8 +67,8 @@ var cgroupCPU = []string{
 }
 
 // DrawCPUStat gather CPU stat vals and set
-func DrawCPUStat(cpath string, control cgroups.Cgroup, label *termui.List, data *termui.List, total *CPUStat) {
-	if !util.IsEnableSubsystem("cpu", control) {
+func DrawCPUStat(cpath string, label *termui.List, data *termui.List, total *CPUStat) {
+	if !util.IsEnableSubsystem(cpath, "cpu") {
 		return
 	}
 

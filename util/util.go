@@ -22,7 +22,6 @@ package util
 
 import (
 	"fmt"
-	"github.com/containerd/cgroups"
 	"github.com/dustin/go-humanize"
 	"io/ioutil"
 	"math"
@@ -32,43 +31,46 @@ import (
 	"strings"
 )
 
-func Subsystems() ([]string, error) {
-	ss := []string{}
-	subsystems, err := cgroups.V1()
-	if err != nil {
-		return nil, err
-	}
-	for _, s := range subsystems {
-		ss = append(ss, string(s.Name()))
-	}
-	return ss, nil
+func Exists(filename string) bool {
+	_, err := os.Stat(filename)
+	return err == nil
 }
 
-func Hierarchy(c string) cgroups.Hierarchy {
-	f := func() ([]cgroups.Subsystem, error) {
-		enabled := []cgroups.Subsystem{}
-		subsystems, err := cgroups.V1()
-		if err != nil {
-			return nil, err
-		}
-		for _, s := range subsystems {
-			path := fmt.Sprintf("/sys/fs/cgroup/%s%s", s.Name(), c)
-			if _, err := os.Lstat(path); err != nil {
-				continue
-			}
-			enabled = append(enabled, s)
-		}
-		return enabled, nil
-	}
-	return f
+var Subsystems = []string{
+	"devices",
+	"hugetlb",
+	"freezer",
+	"pids",
+	"net_cls",
+	"net_prio",
+	"perf_event",
+	"cpuset",
+	"cpu",
+	"cpuacct",
+	"memory",
+	"blkio",
+	"rdma",
 }
 
-func IsEnableSubsystem(sname string, control cgroups.Cgroup) bool {
-	subsys := control.Subsystems()
-	for _, s := range subsys {
-		if string(s.Name()) == sname {
-			return true
+func EnabledSubsystems(cpath string) []string {
+	enabled := []string{}
+	for _, s := range Subsystems {
+		path := fmt.Sprintf("/sys/fs/cgroup/%s%s", s, cpath)
+		if _, err := os.Lstat(path); err != nil {
+			continue
 		}
+		enabled = append(enabled, s)
+	}
+	return enabled
+}
+
+func IsEnableSubsystem(cpath string, sname string) bool {
+	for _, s := range Subsystems {
+		path := fmt.Sprintf("/sys/fs/cgroup/%s%s", s, cpath)
+		if _, err := os.Lstat(path); err != nil {
+			continue
+		}
+		return true
 	}
 	return false
 }

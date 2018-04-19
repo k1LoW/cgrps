@@ -21,9 +21,9 @@
 package cmd
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
-	"github.com/containerd/cgroups"
 	"github.com/k1LoW/cgrps/util"
 	"github.com/k1LoW/go-ps"
 	"github.com/spf13/cobra"
@@ -31,6 +31,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -57,36 +58,60 @@ var psCmd = &cobra.Command{
 			cpath = strings.TrimRight(string(b), "\n")
 		}
 
-		h := util.Hierarchy(cpath)
-
-		control, err := cgroups.Load(h, cgroups.StaticPath(cpath))
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		subsys := control.Subsystems()
-
-		processes, err := control.Processes(subsys[0].Name(), true)
+		processes, err := processes(cpath)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
 
 		fmt.Println(fmt.Sprintf("%5s", "PID"), fmt.Sprintf("%5s", "PPID"), fmt.Sprintf("%15s", "CMD"), "PATH")
-		for _, p := range processes {
-			pr, err := ps.FindProcess(p.Pid)
-			if err != nil {
-				fmt.Println(p.Pid)
-				fmt.Println(err)
-				os.Exit(1)
-			}
-			path, err := filepath.EvalSymlinks(fmt.Sprintf("/proc/%d/exe", p.Pid))
+		for _, pr := range processes {
+			path, err := filepath.EvalSymlinks(fmt.Sprintf("/proc/%d/exe", pr.Pid()))
 			if err != nil {
 				path = "-"
 			}
 			fmt.Println(fmt.Sprintf("%5d", pr.Pid()), fmt.Sprintf("%5d", pr.PPid()), fmt.Sprintf("%15s", pr.Executable()), path)
 		}
 	},
+}
+
+func processes(cpath string) ([]ps.Process, error) {
+	subsys := util.EnabledSubsystems(cpath)
+
+	path := fmt.Sprintf("/sys/fs/cgroup/%s%s", subsys[0], cpath)
+
+	var processes []ps.Process
+	err := filepath.Walk(path, func(p string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		name := filepath.Base(p)
+		if name != "cgroup.procs" {
+			return nil
+		}
+		f, err := os.Open(filepath.Join(path, "cgroup.procs"))
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+
+		scanner := bufio.NewScanner(f)
+		for scanner.Scan() {
+			if t := scanner.Text(); t != "" {
+				pid, err := strconv.Atoi(t)
+				if err != nil {
+					return err
+				}
+				pr, err := ps.FindProcess(pid)
+				if err != nil {
+					return err
+				}
+				processes = append(processes, pr)
+			}
+		}
+		return nil
+	})
+	return processes, err
 }
 
 func init() {

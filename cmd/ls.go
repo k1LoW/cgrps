@@ -36,17 +36,16 @@ var lsCmd = &cobra.Command{
 	Long:  `list cgroups.`,
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		subsys, err := util.Subsystems()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		subsys := util.Subsystems
 
 		cs := []string{}
 		encountered := make(map[string]bool)
 
 		for _, s := range subsys {
 			searchDir := fmt.Sprintf("/sys/fs/cgroup/%s", s)
+			if !util.Exists(searchDir) {
+				continue
+			}
 
 			err := filepath.Walk(searchDir, func(path string, f os.FileInfo, err error) error {
 				if f.IsDir() {

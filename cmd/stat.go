@@ -22,10 +22,8 @@ package cmd
 
 import (
 	"errors"
-	"fmt"
-	"github.com/containerd/cgroups"
 	"github.com/gizak/termui"
-	"github.com/k1LoW/cgrps/util"
+	// "github.com/k1LoW/cgrps/util"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh/terminal"
 	"io/ioutil"
@@ -56,26 +54,7 @@ var statCmd = &cobra.Command{
 			cpath = strings.TrimRight(string(b), "\n")
 		}
 
-		h := util.Hierarchy(cpath)
-
-		control, err := cgroups.Load(h, cgroups.StaticPath(cpath))
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-
-		// debug
-		// stats, err := control.Stat(cgroups.IgnoreNotExist)
-		// subsys := control.Subsystems()
-		// if err != nil {
-		// 	fmt.Println(err)
-		// 	os.Exit(1)
-		// }
-		// fmt.Printf("%s\n", stats)
-		// fmt.Printf("%s\n", subsys)
-		// os.Exit(1)
-
-		err = termui.Init()
+		err := termui.Init()
 		if err != nil {
 			panic(err)
 		}
@@ -124,10 +103,10 @@ var statCmd = &cobra.Command{
 		})
 
 		termui.Handle("/timer/1s", func(e termui.Event) {
-			DrawCgroupStat(cpath, control, cgroupLabel, cgroupData)
-			DrawCPUStat(cpath, control, cpuLabel, cpuData, cpuDataTotal)
-			DrawMemoryStat(cpath, control, memoryLabel, memoryData)
-			DrawBlkioStat(cpath, control, blkioLabel, blkioData)
+			DrawCgroupStat(cpath, cgroupLabel, cgroupData)
+			DrawCPUStat(cpath, cpuLabel, cpuData, cpuDataTotal)
+			DrawMemoryStat(cpath, memoryLabel, memoryData)
+			DrawBlkioStat(cpath, blkioLabel, blkioData)
 
 			termui.Render(termui.Body)
 		})

@@ -22,7 +22,6 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/containerd/cgroups"
 	"github.com/gizak/termui"
 	"github.com/k1LoW/cgrps/util"
 	"strings"
@@ -78,8 +77,8 @@ var cgroupBlkio = []string{
 	// "blkio.dequeue",
 }
 
-func DrawBlkioStat(cpath string, control cgroups.Cgroup, label *termui.List, data *termui.List) {
-	if !util.IsEnableSubsystem("blkio", control) {
+func DrawBlkioStat(cpath string, label *termui.List, data *termui.List) {
+	if !util.IsEnableSubsystem(cpath, "blkio") {
 		return
 	}
 

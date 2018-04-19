@@ -22,7 +22,6 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/containerd/cgroups"
 	"github.com/gizak/termui"
 	"os"
 )
@@ -47,9 +46,8 @@ func NewCgroupStat(cpath string) (*termui.List, *termui.List) {
 	return label, data
 }
 
-func DrawCgroupStat(cpath string, control cgroups.Cgroup, label *termui.List, data *termui.List) {
-	subsys := control.Subsystems()
-	processes, err := control.Processes(subsys[0].Name(), true)
+func DrawCgroupStat(cpath string, label *termui.List, data *termui.List) {
+	processes, err := processes(cpath)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
