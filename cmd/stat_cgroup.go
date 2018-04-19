@@ -23,6 +23,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/gizak/termui"
+	"github.com/k1LoW/cgrps/util"
 	"os"
 )
 
@@ -33,25 +34,28 @@ func NewCgroupStat(cpath string) (*termui.List, *termui.List) {
 	label.Items = []string{
 		"  cgroup path:",
 		"  cgroup.procs:",
+		"  subsystems:",
 	}
-	label.Height = 3
+	label.Height = 4
 
 	data := termui.NewList()
 	data.Border = false
 	data.Items = []string{
-		cpath, "-",
+		cpath, "-", "-",
 	}
-	data.Height = 3
+	data.Height = 4
 
 	return label, data
 }
 
 func DrawCgroupStat(cpath string, label *termui.List, data *termui.List) {
-	processes, err := processes(cpath)
+	processes, err := util.Processes(cpath)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 	// cgroup.procs
-	data.Items[1] = fmt.Sprintf("%d", len(processes)) // @todo use /sys/fs/cgroup/$/cgroup.procs directly
+	data.Items[1] = fmt.Sprintf("%d", len(processes))
+	// subsystems
+	data.Items[2] = fmt.Sprintf("%v", util.EnabledSubsystems(cpath))
 }

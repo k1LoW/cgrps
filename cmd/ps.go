@@ -21,17 +21,14 @@
 package cmd
 
 import (
-	"bufio"
 	"errors"
 	"fmt"
 	"github.com/k1LoW/cgrps/util"
-	"github.com/k1LoW/go-ps"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh/terminal"
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 )
 
@@ -58,7 +55,7 @@ var psCmd = &cobra.Command{
 			cpath = strings.TrimRight(string(b), "\n")
 		}
 
-		processes, err := processes(cpath)
+		processes, err := util.Processes(cpath)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -73,45 +70,6 @@ var psCmd = &cobra.Command{
 			fmt.Println(fmt.Sprintf("%5d", pr.Pid()), fmt.Sprintf("%5d", pr.PPid()), fmt.Sprintf("%15s", pr.Executable()), path)
 		}
 	},
-}
-
-func processes(cpath string) ([]ps.Process, error) {
-	subsys := util.EnabledSubsystems(cpath)
-
-	path := fmt.Sprintf("/sys/fs/cgroup/%s%s", subsys[0], cpath)
-
-	var processes []ps.Process
-	err := filepath.Walk(path, func(p string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		name := filepath.Base(p)
-		if name != "cgroup.procs" {
-			return nil
-		}
-		f, err := os.Open(filepath.Join(path, "cgroup.procs"))
-		if err != nil {
-			return err
-		}
-		defer f.Close()
-
-		scanner := bufio.NewScanner(f)
-		for scanner.Scan() {
-			if t := scanner.Text(); t != "" {
-				pid, err := strconv.Atoi(t)
-				if err != nil {
-					return err
-				}
-				pr, err := ps.FindProcess(pid)
-				if err != nil {
-					return err
-				}
-				processes = append(processes, pr)
-			}
-		}
-		return nil
-	})
-	return processes, err
 }
 
 func init() {

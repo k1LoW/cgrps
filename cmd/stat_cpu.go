@@ -68,7 +68,7 @@ var cgroupCPU = []string{
 
 // DrawCPUStat gather CPU stat vals and set
 func DrawCPUStat(cpath string, label *termui.List, data *termui.List, total *CPUStat) {
-	if !util.IsEnableSubsystem(cpath, "cpu") {
+	if !util.IsEnableSubsystem(cpath, "cpu,cpuacct") && !util.IsEnableSubsystem(cpath, "cpuset") {
 		return
 	}
 

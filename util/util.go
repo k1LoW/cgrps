@@ -23,69 +23,14 @@ package util
 import (
 	"fmt"
 	"github.com/dustin/go-humanize"
-	"io/ioutil"
 	"math"
 	"os"
-	"os/exec"
 	"strconv"
-	"strings"
 )
 
 func Exists(filename string) bool {
 	_, err := os.Stat(filename)
 	return err == nil
-}
-
-var Subsystems = []string{
-	"devices",
-	"hugetlb",
-	"freezer",
-	"pids",
-	"net_cls",
-	"net_prio",
-	"perf_event",
-	"cpuset",
-	"cpu",
-	"cpuacct",
-	"memory",
-	"blkio",
-	"rdma",
-}
-
-func EnabledSubsystems(cpath string) []string {
-	enabled := []string{}
-	for _, s := range Subsystems {
-		path := fmt.Sprintf("/sys/fs/cgroup/%s%s", s, cpath)
-		if _, err := os.Lstat(path); err != nil {
-			continue
-		}
-		enabled = append(enabled, s)
-	}
-	return enabled
-}
-
-func IsEnableSubsystem(cpath string, sname string) bool {
-	for _, s := range Subsystems {
-		path := fmt.Sprintf("/sys/fs/cgroup/%s%s", s, cpath)
-		if _, err := os.Lstat(path); err != nil {
-			continue
-		}
-		return true
-	}
-	return false
-}
-
-func ReadSimple(cpath string, sname string, stat string) (string, error) {
-	path := fmt.Sprintf("/sys/fs/cgroup/%s%s/%s", sname, cpath, stat)
-	val, err := ioutil.ReadFile(path)
-	if err != nil {
-		return "", err
-	}
-	str := strings.TrimRight(string(val), "\n")
-	if str == "" {
-		str = ""
-	}
-	return str, nil
 }
 
 func Bytes(v string) string {
@@ -104,18 +49,6 @@ func Usec(v float64) string {
 func UsecPerSec(v float64) string {
 	vint := int64(v)
 	return fmt.Sprintf("%v us/sec", humanize.Comma(vint))
-}
-
-func ClkTck() float64 {
-	tck := float64(128)
-	out, err := exec.Command("/usr/bin/getconf", "CLK_TCK").Output()
-	if err == nil {
-		i, err := strconv.ParseFloat(string(out), 64)
-		if err == nil {
-			tck = float64(i)
-		}
-	}
-	return tck
 }
 
 func Round(f float64) float64 {
