@@ -29,3 +29,9 @@ report a snapshot of the current cgroups processes.
 ### `cgrps stat [CGROUP]`
 
 show current cgroups stats (`CPU` `MEMORY` `BLKIO`).
+
+## !!!NOTICE!!!
+
+`cgrps` displays cgroups with the same name together.
+
+If you want to check separately, please use `libcgroup-tools` etc.
