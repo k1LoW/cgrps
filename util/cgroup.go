@@ -32,6 +32,7 @@ import (
 	"strings"
 )
 
+// Subsystems cgroups subsystems list
 var Subsystems = []string{
 	"cpuset",
 	"cpu,cpuacct",
@@ -92,8 +93,8 @@ func Processes(cpath string) ([]ps.Process, error) {
 			if err != nil {
 				return err
 			}
-			name := filepath.Base(p)
-			if name != "cgroup.procs" {
+			base := filepath.Base(p)
+			if base != "cgroup.procs" {
 				return nil
 			}
 			procs, err := os.Open(filepath.Join(path, "cgroup.procs"))

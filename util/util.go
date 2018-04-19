@@ -24,14 +24,8 @@ import (
 	"fmt"
 	"github.com/dustin/go-humanize"
 	"math"
-	"os"
 	"strconv"
 )
-
-func Exists(filename string) bool {
-	_, err := os.Stat(filename)
-	return err == nil
-}
 
 func Bytes(v string) string {
 	parsed, err := strconv.ParseUint(v, 10, 64)
