@@ -77,11 +77,11 @@ func ReadSimple(cpath string, sname string, stat string) (string, error) {
 	path := fmt.Sprintf("/sys/fs/cgroup/%s%s/%s", sname, cpath, stat)
 	val, err := ioutil.ReadFile(path)
 	if err != nil {
-		return "-", err
+		return "", err
 	}
 	str := strings.TrimRight(string(val), "\n")
 	if str == "" {
-		str = "-"
+		str = ""
 	}
 	return str, nil
 }
