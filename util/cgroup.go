@@ -111,19 +111,6 @@ func (c *Cgroups) IsEnableSubsystem(cpath string, sname string) bool {
 	return true
 }
 
-func (c *Cgroups) ReadSimple(cpath string, sname string, stat string) (string, error) {
-	path := fmt.Sprintf("%s/%s%s/%s", c.FsPath, sname, cpath, stat)
-	val, err := ioutil.ReadFile(path)
-	if err != nil {
-		return "", err
-	}
-	str := strings.TrimRight(string(val), "\n")
-	if str == "" {
-		str = ""
-	}
-	return str, nil
-}
-
 func (c *Cgroups) Processes(cpath string) ([]ps.Process, error) {
 	subsys := c.EnabledSubsystems(cpath)
 
@@ -176,4 +163,17 @@ func (c *Cgroups) Processes(cpath string) ([]ps.Process, error) {
 	}
 
 	return processes, nil
+}
+
+func (c *Cgroups) ReadSimple(cpath string, sname string, stat string) (string, error) {
+	path := fmt.Sprintf("%s/%s%s/%s", c.FsPath, sname, cpath, stat)
+	val, err := ioutil.ReadFile(path)
+	if err != nil {
+		return "", err
+	}
+	str := strings.TrimRight(string(val), "\n")
+	if str == "" {
+		str = ""
+	}
+	return str, nil
 }
