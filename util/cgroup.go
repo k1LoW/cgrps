@@ -28,6 +28,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -155,6 +156,8 @@ func (c *Cgroups) Processes(cpath string) ([]ps.Process, error) {
 			return processes, err
 		}
 	}
+
+	sort.Ints(pids)
 
 	for _, pid := range pids {
 		pr, err := ps.FindProcess(pid)
