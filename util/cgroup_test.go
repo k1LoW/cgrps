@@ -12,7 +12,7 @@ func TestList(t *testing.T) {
 		t.Error(err)
 	}
 	actual := len(cs)
-	expected := 71
+	expected := 72
 	if actual != expected {
 		t.Errorf("actual %v\nwant %v", actual, expected)
 	}

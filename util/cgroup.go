@@ -66,7 +66,7 @@ type Cgroups struct {
 func (c *Cgroups) List() ([]string, error) {
 	subsys := c.EnabledSubsystems("/")
 
-	cs := []string{}
+	cs := []string{"/"}
 	encountered := make(map[string]bool)
 
 	for _, s := range subsys {
