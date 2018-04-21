@@ -34,4 +34,4 @@ show current cgroups stats (`CPU` `MEMORY` `BLKIO`).
 
 `cgrps` displays cgroups with the same name together.
 
-If you want to check separately, please use `libcgroup-tools` etc.
+If you want to check separately, please use `cgroup-tools (Ubuntu)` or `libcgroup-tools (CentOS)` etc.
