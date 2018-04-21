@@ -76,6 +76,9 @@ var statCmd = &cobra.Command{
 				termui.NewCol(2, 0, cgroupLabel),
 				termui.NewCol(6, 0, cgroupData),
 			),
+		)
+
+		termui.Body.AddRows(
 			termui.NewRow(
 				termui.NewCol(2, 0, cpuTitle),
 				termui.NewCol(2, 2, memoryTitle),
@@ -90,6 +93,7 @@ var statCmd = &cobra.Command{
 				termui.NewCol(2, 0, blkioData),
 			),
 		)
+
 		termui.Body.Align()
 
 		termui.Render(termui.Body)
