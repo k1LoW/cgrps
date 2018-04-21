@@ -2,6 +2,8 @@
 
 `cgrps` is a set of commands for checking cgroups.
 
+![ttygif](cgrps.gif)
+
 ## Usage
 
 `cgrps` is supposed to be used with [peco](https://github.com/peco/peco) like following command,
