@@ -78,7 +78,8 @@ var cgroupBlkio = []string{
 }
 
 func DrawBlkioStat(cpath string, label *termui.List, data *termui.List) {
-	if !util.IsEnableSubsystem(cpath, "blkio") {
+	c := util.Cgroups{FsPath: "/sys/fs/cgroup"}
+	if !c.IsEnableSubsystem(cpath, "blkio") {
 		return
 	}
 
@@ -87,7 +88,7 @@ func DrawBlkioStat(cpath string, label *termui.List, data *termui.List) {
 	// cgroupBlkio
 	for _, s := range cgroupBlkio {
 		splited := strings.SplitN(s, ".", 2)
-		val, err := util.ReadSimple(cpath, splited[0], s)
+		val, err := c.ReadSimple(cpath, splited[0], s)
 		if val != "" && err == nil {
 			label.Items = append(label.Items, fmt.Sprintf("%s:", s))
 			d = append(d, fmt.Sprintf("%v", val))

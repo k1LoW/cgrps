@@ -4,6 +4,11 @@ DATE = $$(date --utc '+%Y-%m-%d_%H:%M:%S')
 BUILD_LDFLAGS = -X $(PKG).commit=$(COMMIT) -X $(PKG).date=$(DATE)
 RELEASE_BUILD_LDFLAGS = -s -w $(BUILD_LDFLAGS)
 
+default: test
+
+test:
+	go test -cover -v $(shell go list ./... | grep -v vendor)
+
 deps:
 	go get -u github.com/golang/dep/cmd/dep
 	dep ensure
@@ -26,3 +31,5 @@ crossbuild: deps depsdev
 release: crossbuild
 	$(eval ver = v$(shell gobump show -r))
 	ghr -username k1LoW -replace ${ver} dist/${ver}
+
+.PHONY: default test deps

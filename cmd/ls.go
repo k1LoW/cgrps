@@ -34,7 +34,8 @@ var lsCmd = &cobra.Command{
 	Long:  `list cgroups.`,
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		cs, err := util.Cgroups()
+		c := util.Cgroups{FsPath: "/sys/fs/cgroup"}
+		cs, err := c.List()
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)

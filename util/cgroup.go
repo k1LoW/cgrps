@@ -47,28 +47,24 @@ var Subsystems = []string{
 	"rdma",
 }
 
-func EnabledSubsystems(cpath string) []string {
-	enabled := []string{}
-	for _, s := range Subsystems {
-		path := fmt.Sprintf("/sys/fs/cgroup/%s%s", s, cpath)
-		if _, err := os.Lstat(path); err != nil {
-			continue
+func ClkTck() float64 {
+	tck := float64(128)
+	out, err := exec.Command("/usr/bin/getconf", "CLK_TCK").Output()
+	if err == nil {
+		i, err := strconv.ParseFloat(string(out), 64)
+		if err == nil {
+			tck = float64(i)
 		}
-		enabled = append(enabled, s)
 	}
-	return enabled
+	return tck
 }
 
-func IsEnableSubsystem(cpath string, sname string) bool {
-	path := fmt.Sprintf("/sys/fs/cgroup/%s%s", sname, cpath)
-	if _, err := os.Lstat(path); err != nil {
-		return false
-	}
-	return true
+type Cgroups struct {
+	FsPath string
 }
 
-func Cgroups() ([]string, error) {
-	subsys := EnabledSubsystems("/")
+func (c *Cgroups) List() ([]string, error) {
+	subsys := c.EnabledSubsystems("/")
 
 	cs := []string{}
 	encountered := make(map[string]bool)
@@ -95,8 +91,28 @@ func Cgroups() ([]string, error) {
 	return cs, nil
 }
 
-func ReadSimple(cpath string, sname string, stat string) (string, error) {
-	path := fmt.Sprintf("/sys/fs/cgroup/%s%s/%s", sname, cpath, stat)
+func (c *Cgroups) EnabledSubsystems(cpath string) []string {
+	enabled := []string{}
+	for _, s := range Subsystems {
+		path := fmt.Sprintf("%s/%s%s", c.FsPath, s, cpath)
+		if _, err := os.Lstat(path); err != nil {
+			continue
+		}
+		enabled = append(enabled, s)
+	}
+	return enabled
+}
+
+func (c *Cgroups) IsEnableSubsystem(cpath string, sname string) bool {
+	path := fmt.Sprintf("%s/%s%s", c.FsPath, sname, cpath)
+	if _, err := os.Lstat(path); err != nil {
+		return false
+	}
+	return true
+}
+
+func (c *Cgroups) ReadSimple(cpath string, sname string, stat string) (string, error) {
+	path := fmt.Sprintf("%s/%s%s/%s", c.FsPath, sname, cpath, stat)
 	val, err := ioutil.ReadFile(path)
 	if err != nil {
 		return "", err
@@ -108,15 +124,15 @@ func ReadSimple(cpath string, sname string, stat string) (string, error) {
 	return str, nil
 }
 
-func Processes(cpath string) ([]ps.Process, error) {
-	subsys := EnabledSubsystems(cpath)
+func (c *Cgroups) Processes(cpath string) ([]ps.Process, error) {
+	subsys := c.EnabledSubsystems(cpath)
 
 	pids := []int{}
 	processes := []ps.Process{}
 	encountered := make(map[int]bool)
 
 	for _, s := range subsys {
-		path := fmt.Sprintf("/sys/fs/cgroup/%s%s", s, cpath)
+		path := fmt.Sprintf("%s/%s%s", c.FsPath, s, cpath)
 		err := filepath.Walk(path, func(p string, f os.FileInfo, err error) error {
 			if err != nil {
 				return err
@@ -160,16 +176,4 @@ func Processes(cpath string) ([]ps.Process, error) {
 	}
 
 	return processes, nil
-}
-
-func ClkTck() float64 {
-	tck := float64(128)
-	out, err := exec.Command("/usr/bin/getconf", "CLK_TCK").Output()
-	if err == nil {
-		i, err := strconv.ParseFloat(string(out), 64)
-		if err == nil {
-			tck = float64(i)
-		}
-	}
-	return tck
 }

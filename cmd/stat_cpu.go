@@ -68,7 +68,8 @@ var cgroupCPU = []string{
 
 // DrawCPUStat gather CPU stat vals and set
 func DrawCPUStat(cpath string, label *termui.List, data *termui.List, total *CPUStat) {
-	if !util.IsEnableSubsystem(cpath, "cpu,cpuacct") && !util.IsEnableSubsystem(cpath, "cpuset") {
+	c := util.Cgroups{FsPath: "/sys/fs/cgroup"}
+	if !c.IsEnableSubsystem(cpath, "cpu,cpuacct") && !c.IsEnableSubsystem(cpath, "cpuset") {
 		return
 	}
 
@@ -80,7 +81,7 @@ func DrawCPUStat(cpath string, label *termui.List, data *termui.List, total *CPU
 	// cgroupCPU
 	for _, s := range cgroupCPU {
 		splited := strings.SplitN(s, ".", 2)
-		val, err := util.ReadSimple(cpath, splited[0], s)
+		val, err := c.ReadSimple(cpath, splited[0], s)
 		if val != "" && err == nil {
 			l = fmt.Sprintf("%s:", s)
 			label.Items = append(label.Items, l)
@@ -97,7 +98,7 @@ func DrawCPUStat(cpath string, label *termui.List, data *termui.List, total *CPU
 	}
 
 	// cpuacct.stat
-	stat, err := util.ReadSimple(cpath, "cpu", "cpuacct.stat")
+	stat, err := c.ReadSimple(cpath, "cpu", "cpuacct.stat")
 	if err == nil {
 		in := strings.NewReader(stat)
 		scanner := bufio.NewScanner(in)
@@ -123,7 +124,7 @@ func DrawCPUStat(cpath string, label *termui.List, data *termui.List, total *CPU
 	}
 
 	// cpuacct.usage
-	v, err := util.ReadSimple(cpath, "cpu", "cpuacct.usage")
+	v, err := c.ReadSimple(cpath, "cpu", "cpuacct.usage")
 	l = "cpuacct.usage:"
 	t, err = strconv.ParseUint(v, 10, 64)
 	if err != nil {
@@ -140,7 +141,7 @@ func DrawCPUStat(cpath string, label *termui.List, data *termui.List, total *CPU
 	// cpuacct.usage_percpu
 
 	// cpu.stat
-	stat, err = util.ReadSimple(cpath, "cpu", "cpu.stat")
+	stat, err = c.ReadSimple(cpath, "cpu", "cpu.stat")
 	if err == nil {
 		in := strings.NewReader(stat)
 		scanner := bufio.NewScanner(in)

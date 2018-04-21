@@ -57,7 +57,8 @@ var cgroupMemory = []string{
 }
 
 func DrawMemoryStat(cpath string, label *termui.List, data *termui.List) {
-	if !util.IsEnableSubsystem(cpath, "memory") {
+	c := util.Cgroups{FsPath: "/sys/fs/cgroup"}
+	if !c.IsEnableSubsystem(cpath, "memory") {
 		return
 	}
 
@@ -66,7 +67,7 @@ func DrawMemoryStat(cpath string, label *termui.List, data *termui.List) {
 	// cgroupMemory
 	for _, s := range cgroupMemory {
 		splited := strings.SplitN(s, ".", 2)
-		val, err := util.ReadSimple(cpath, splited[0], s)
+		val, err := c.ReadSimple(cpath, splited[0], s)
 		if err == nil {
 			label.Items = append(label.Items, fmt.Sprintf("%s:", s))
 			d = append(d, fmt.Sprintf("%v", util.Bytes(val)))
@@ -74,7 +75,7 @@ func DrawMemoryStat(cpath string, label *termui.List, data *termui.List) {
 	}
 
 	// memoty.stat
-	stat, err := util.ReadSimple(cpath, "memory", "memory.stat")
+	stat, err := c.ReadSimple(cpath, "memory", "memory.stat")
 	if err == nil {
 		in := strings.NewReader(stat)
 		scanner := bufio.NewScanner(in)

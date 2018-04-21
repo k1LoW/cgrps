@@ -49,7 +49,8 @@ func NewCgroupStat(cpath string) (*termui.List, *termui.List) {
 }
 
 func DrawCgroupStat(cpath string, label *termui.List, data *termui.List) {
-	processes, err := util.Processes(cpath)
+	c := util.Cgroups{FsPath: "/sys/fs/cgroup"}
+	processes, err := c.Processes(cpath)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -57,5 +58,5 @@ func DrawCgroupStat(cpath string, label *termui.List, data *termui.List) {
 	// cgroup.procs
 	data.Items[1] = fmt.Sprintf("%d", len(processes))
 	// subsystems
-	data.Items[2] = fmt.Sprintf("%v", util.EnabledSubsystems(cpath))
+	data.Items[2] = fmt.Sprintf("%v", c.EnabledSubsystems(cpath))
 }

@@ -55,7 +55,8 @@ var psCmd = &cobra.Command{
 			cpath = strings.TrimRight(string(b), "\n")
 		}
 
-		processes, err := util.Processes(cpath)
+		c := util.Cgroups{FsPath: "/sys/fs/cgroup"}
+		processes, err := c.Processes(cpath)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
