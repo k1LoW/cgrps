@@ -9,19 +9,24 @@ default: test
 test:
 	go test -cover -v $(shell go list ./... | grep -v vendor)
 
+cover: depsdev
+	goveralls -service=travis-ci
+
+build:
+	go build -ldflags="$(BUILD_LDFLAGS)"
+
 deps:
 	go get -u github.com/golang/dep/cmd/dep
 	dep ensure
 
 depsdev:
+	go get golang.org/x/tools/cmd/cover
+	go get github.com/mattn/goveralls
 	go get github.com/golang/lint/golint
 	go get github.com/motemen/gobump/cmd/gobump
-	go get -u github.com/Songmu/goxz/cmd/goxz
-	go get -u github.com/tcnksm/ghr
-	go get -u github.com/Songmu/ghch/cmd/ghch
-
-build:
-	go build -ldflags="$(BUILD_LDFLAGS)"
+	go get github.com/Songmu/goxz/cmd/goxz
+	go get github.com/tcnksm/ghr
+	go get github.com/Songmu/ghch/cmd/ghch
 
 crossbuild: deps depsdev
 	$(eval ver = v$(shell gobump show -r))
@@ -32,4 +37,4 @@ release: crossbuild
 	$(eval ver = v$(shell gobump show -r))
 	ghr -username k1LoW -replace ${ver} dist/${ver}
 
-.PHONY: default test deps
+.PHONY: default test deps cover
