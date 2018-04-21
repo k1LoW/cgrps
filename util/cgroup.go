@@ -35,12 +35,14 @@ import (
 // Subsystems cgroups subsystems list
 var Subsystems = []string{
 	"cpuset",
-	"cpu,cpuacct",
+	"cpu",
+	"cpuacct",
 	"blkio",
 	"memory",
 	"devices",
 	"freezer",
-	"net_cls,net_prio",
+	"net_cls",
+	"net_prio",
 	"perf_event",
 	"hugetlb",
 	"pids",

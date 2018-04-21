@@ -22,7 +22,7 @@ func TestEnabledSubsystems(t *testing.T) {
 	c := Cgroups{FsPath: testFs()}
 	subsystems := c.EnabledSubsystems("/my-cgroup")
 	actual := len(subsystems)
-	expected := 3
+	expected := 4
 	if actual != expected {
 		t.Errorf("actual %v\nwant %v", actual, expected)
 	}

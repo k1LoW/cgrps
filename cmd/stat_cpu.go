@@ -98,7 +98,7 @@ func DrawCPUStat(cpath string, label *termui.List, data *termui.List, total *CPU
 	}
 
 	// cpuacct.stat
-	stat, err := c.ReadSimple(cpath, "cpu", "cpuacct.stat")
+	stat, err := c.ReadSimple(cpath, "cpuacct", "cpuacct.stat")
 	if err == nil {
 		in := strings.NewReader(stat)
 		scanner := bufio.NewScanner(in)
@@ -124,19 +124,21 @@ func DrawCPUStat(cpath string, label *termui.List, data *termui.List, total *CPU
 	}
 
 	// cpuacct.usage
-	v, err := c.ReadSimple(cpath, "cpu", "cpuacct.usage")
-	l = "cpuacct.usage:"
-	t, err = strconv.ParseUint(v, 10, 64)
-	if err != nil {
-		panic(err)
+	v, err := c.ReadSimple(cpath, "cpuacct", "cpuacct.usage")
+	if err == nil {
+		l = "cpuacct.usage:"
+		t, err = strconv.ParseUint(v, 10, 64)
+		if err != nil {
+			panic(err)
+		}
+		if prev, ok := total.Items[l]; ok {
+			d = append(d, util.UsecPerSec(util.Round(float64(t-prev)/1000)))
+		} else {
+			d = append(d, "-       ")
+		}
+		total.Items[l] = t
+		label.Items = append(label.Items, l)
 	}
-	if prev, ok := total.Items[l]; ok {
-		d = append(d, util.UsecPerSec(util.Round(float64(t-prev)/1000)))
-	} else {
-		d = append(d, "-       ")
-	}
-	total.Items[l] = t
-	label.Items = append(label.Items, l)
 
 	// cpuacct.usage_percpu
 
