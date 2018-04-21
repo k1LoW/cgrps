@@ -70,7 +70,7 @@ func (c *Cgroups) List() ([]string, error) {
 	encountered := make(map[string]bool)
 
 	for _, s := range subsys {
-		searchDir := fmt.Sprintf("/sys/fs/cgroup/%s", s)
+		searchDir := filepath.Clean(fmt.Sprintf("%s/%s", c.FsPath, s))
 
 		err := filepath.Walk(searchDir, func(path string, f os.FileInfo, err error) error {
 			if f.IsDir() {
