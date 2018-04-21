@@ -69,7 +69,7 @@ var cgroupCPU = []string{
 // DrawCPUStat gather CPU stat vals and set
 func DrawCPUStat(cpath string, label *termui.List, data *termui.List, total *CPUStat) {
 	c := util.Cgroups{FsPath: "/sys/fs/cgroup"}
-	if !c.IsEnableSubsystem(cpath, "cpu,cpuacct") && !c.IsEnableSubsystem(cpath, "cpuset") {
+	if !c.IsEnableSubsystem(cpath, "cpuset") && !c.IsEnableSubsystem(cpath, "cpuacct") && !c.IsEnableSubsystem(cpath, "cpu") {
 		return
 	}
 
