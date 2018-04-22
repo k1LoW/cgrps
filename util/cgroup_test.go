@@ -55,6 +55,18 @@ func TestProcesses(t *testing.T) {
 	}
 }
 
+func TestReadSimple(t *testing.T) {
+	c := Cgroups{FsPath: testFs()}
+	actual, err := c.ReadSimple("/my-cgroup", "memory", "memory.usage_in_bytes")
+	if err != nil {
+		t.Error(err)
+	}
+	expected := "1234567890"
+	if actual != expected {
+		t.Errorf("actual %v\nwant %v", actual, expected)
+	}
+}
+
 func testFs() string {
 	dir, _ := os.Getwd()
 	return dir + "/../test/sys/fs/cgroup"

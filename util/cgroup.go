@@ -50,6 +50,7 @@ var Subsystems = []string{
 	"rdma",
 }
 
+// ClkTck return clocks per sec (CLK_TCK)
 func ClkTck() float64 {
 	tck := float64(128)
 	out, err := exec.Command("/usr/bin/getconf", "CLK_TCK").Output()
@@ -62,10 +63,12 @@ func ClkTck() float64 {
 	return tck
 }
 
+// Cgroups struct
 type Cgroups struct {
 	FsPath string
 }
 
+// List show all cgroups path
 func (c *Cgroups) List() ([]string, error) {
 	subsys := c.EnabledSubsystems("/")
 
@@ -94,6 +97,7 @@ func (c *Cgroups) List() ([]string, error) {
 	return cs, nil
 }
 
+// EnabledSubsystems return active subsystem in specific cgroup path
 func (c *Cgroups) EnabledSubsystems(cpath string) []string {
 	enabled := []string{}
 	for _, s := range Subsystems {
@@ -106,6 +110,7 @@ func (c *Cgroups) EnabledSubsystems(cpath string) []string {
 	return enabled
 }
 
+// IsEnableSubsystem return subsystem is active or not in specific cgroup path
 func (c *Cgroups) IsEnableSubsystem(cpath string, sname string) bool {
 	path := fmt.Sprintf("%s/%s%s", c.FsPath, sname, cpath)
 	if _, err := os.Lstat(path); err != nil {
@@ -114,6 +119,7 @@ func (c *Cgroups) IsEnableSubsystem(cpath string, sname string) bool {
 	return true
 }
 
+// Processes return processe info in specific cgroup path
 func (c *Cgroups) Processes(cpath string) ([]ps.Process, error) {
 	subsys := c.EnabledSubsystems(cpath)
 
@@ -170,6 +176,7 @@ func (c *Cgroups) Processes(cpath string) ([]ps.Process, error) {
 	return processes, nil
 }
 
+// ReadSimple read file and return value as string
 func (c *Cgroups) ReadSimple(cpath string, sname string, stat string) (string, error) {
 	path := fmt.Sprintf("%s/%s%s/%s", c.FsPath, sname, cpath, stat)
 	val, err := ioutil.ReadFile(path)

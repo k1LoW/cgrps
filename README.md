@@ -2,7 +2,7 @@
 
 `cgrps` is a set of commands for checking cgroups.
 
-![ttygif](cgrps.gif)
+![cgrps.gif](cgrps.gif)
 
 ## Usage
 
