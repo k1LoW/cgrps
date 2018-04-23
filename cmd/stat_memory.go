@@ -21,7 +21,6 @@
 package cmd
 
 import (
-	"bufio"
 	"fmt"
 	"github.com/gizak/termui"
 	"github.com/k1LoW/cgrps/cgroups"
@@ -64,58 +63,41 @@ func DrawMemoryStat(cpath string, label *termui.List, data *termui.List) {
 	}
 
 	d := []string{}
+	label.Items = []string{}
 
-	// cgroupMemory
-	for _, s := range cgroupMemory {
-		splited := strings.SplitN(s, ".", 2)
-		val, err := c.ReadSimple(cpath, splited[0], s)
-		if err == nil {
-			label.Items = append(label.Items, fmt.Sprintf("%s:", s))
-			d = append(d, fmt.Sprintf("%v", util.Bytes(val)))
+	// memory
+	memoryLabel, memoryValue := c.Memory(cpath)
+	total := make(map[string]string)
+	for k, v := range memoryLabel {
+		if strings.Index(v, "memory.stat.total_") == 0 {
+			replaced := strings.Replace(v, "memory.stat.total_", "memory.stat.", 1)
+			total[replaced] = memoryValue[k]
 		}
 	}
 
-	// memoty.stat
-	stat, err := c.ReadSimple(cpath, "memory", "memory.stat")
-	if err == nil {
-		in := strings.NewReader(stat)
-		scanner := bufio.NewScanner(in)
-
-		stats := make(map[string]string)
-		lines := []string{}
-		for scanner.Scan() {
-			line := scanner.Text()
-			splited := strings.SplitN(line, " ", 2)
-			k := splited[0]
-			v := splited[1]
-			if strings.Index(k, "total_") == 0 {
-				k = strings.Replace(k, "total_", "", 1)
-				stats[k] = v
-			} else {
-				lines = append(lines, line)
-			}
+	for k, v := range memoryValue {
+		l := fmt.Sprintf("%s:", memoryLabel[k])
+		if strings.Index(l, "memory.stat.total_") == 0 {
+			continue
 		}
-
-		for _, l := range lines {
-			splited := strings.SplitN(l, " ", 2)
-			k := splited[0]
-			v := splited[1]
-			if total, ok := stats[k]; ok {
-				if strings.Index(k, "pgpg") == 0 {
-					d = append(d, fmt.Sprintf("%v / %v", v, total))
+		label.Items = append(label.Items, l)
+		if strings.Index(l, "memory.stat") == 0 {
+			if t, ok := total[memoryLabel[k]]; ok {
+				if strings.Index(l, "memory.stat.pgpg") == 0 {
+					d = append(d, fmt.Sprintf("%v / %v", v, t))
 				} else {
-					d = append(d, fmt.Sprintf("%v / %v", util.Bytes(v), util.Bytes(total)))
+					d = append(d, fmt.Sprintf("%v / %v", util.Bytes(v), util.Bytes(t)))
 				}
 			} else {
-				if strings.Index(k, "pgpg") == 0 {
+				if strings.Index(l, "memory.stat.pgpg") == 0 {
 					d = append(d, fmt.Sprintf("%v", v))
 				} else {
 					d = append(d, fmt.Sprintf("%v", util.Bytes(v)))
 				}
 			}
-			label.Items = append(label.Items, fmt.Sprintf("memory.stat.%s:", k))
+		} else {
+			d = append(d, fmt.Sprintf("%v", util.Bytes(v)))
 		}
-
 	}
 
 	maxlen := 1

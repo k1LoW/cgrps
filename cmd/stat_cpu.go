@@ -21,7 +21,6 @@
 package cmd
 
 import (
-	"bufio"
 	"fmt"
 	"github.com/gizak/termui"
 	"github.com/k1LoW/cgrps/cgroups"
@@ -30,6 +29,7 @@ import (
 	"strings"
 )
 
+// CPUStat have CPU/CPUSet/CPUAcct stat
 type CPUStat struct {
 	Items map[string]uint64
 }
@@ -57,16 +57,6 @@ func NewCPUStat() (*termui.Par, *termui.List, *termui.List, *CPUStat) {
 	return title, label, data, &total
 }
 
-var cgroupCPU = []string{
-	"cpu.cfs_period_us",
-	"cpu.cfs_quota_us",
-	"cpu.rt_period_us",
-	"cpu.rt_runtime_us",
-	"cpu.shares",
-	"cpuset.cpus",
-	"cpuset.mems",
-}
-
 // DrawCPUStat gather CPU stat vals and set
 func DrawCPUStat(cpath string, label *termui.List, data *termui.List, total *CPUStat) {
 	c := cgroups.Cgroups{FsPath: "/sys/fs/cgroup"}
@@ -75,102 +65,68 @@ func DrawCPUStat(cpath string, label *termui.List, data *termui.List, total *CPU
 	}
 
 	d := []string{}
-	var l string
-	var t uint64
+	label.Items = []string{}
 	tick := cgroups.ClkTck()
 
-	// cgroupCPU
-	for _, s := range cgroupCPU {
-		splited := strings.SplitN(s, ".", 2)
-		val, err := c.ReadSimple(cpath, splited[0], s)
-		if val != "" && err == nil {
-			l = fmt.Sprintf("%s:", s)
-			label.Items = append(label.Items, l)
-			if strings.Index(l, "_us") > 0 {
-				fval, err := strconv.ParseFloat(val, 64)
-				if err != nil {
-					panic(err)
-				}
-				d = append(d, util.Usec(fval))
-			} else {
-				d = append(d, fmt.Sprintf("%v       ", val))
-			}
-		}
-	}
-
-	// cpuacct.stat
-	stat, err := c.ReadSimple(cpath, "cpuacct", "cpuacct.stat")
-	if err == nil {
-		in := strings.NewReader(stat)
-		scanner := bufio.NewScanner(in)
-
-		for scanner.Scan() {
-			line := scanner.Text()
-			splited := strings.SplitN(line, " ", 2)
-			k := splited[0]
-			v := splited[1]
-			l = fmt.Sprintf("cpuacct.stat.%s:", k)
-			t, err = strconv.ParseUint(v, 10, 64)
+	// cpu
+	cpuLabel, cpuValue := c.CPU(cpath)
+	for k, v := range cpuValue {
+		l := fmt.Sprintf("%s:", cpuLabel[k])
+		label.Items = append(label.Items, l)
+		if strings.Index(l, "_us") > 0 {
+			fval, err := strconv.ParseFloat(v, 64)
 			if err != nil {
 				panic(err)
 			}
-			if prev, ok := total.Items[l]; ok {
-				d = append(d, util.UsecPerSec(util.Round(float64(t-prev)/tick*1000000)))
-			} else {
-				d = append(d, "-       ")
-			}
-			total.Items[l] = t
-			label.Items = append(label.Items, l)
-		}
-	}
-
-	// cpuacct.usage
-	v, err := c.ReadSimple(cpath, "cpuacct", "cpuacct.usage")
-	if err == nil {
-		l = "cpuacct.usage:"
-		t, err = strconv.ParseUint(v, 10, 64)
-		if err != nil {
-			panic(err)
-		}
-		if prev, ok := total.Items[l]; ok {
-			d = append(d, util.UsecPerSec(util.Round(float64(t-prev)/1000)))
-		} else {
-			d = append(d, "-       ")
-		}
-		total.Items[l] = t
-		label.Items = append(label.Items, l)
-	}
-
-	// cpuacct.usage_percpu
-
-	// cpu.stat
-	stat, err = c.ReadSimple(cpath, "cpu", "cpu.stat")
-	if err == nil {
-		in := strings.NewReader(stat)
-		scanner := bufio.NewScanner(in)
-
-		for scanner.Scan() {
-			line := scanner.Text()
-			splited := strings.SplitN(line, " ", 2)
-			k := splited[0]
-			v := splited[1]
-			l = fmt.Sprintf("cpu.stat.%s:", k)
-			t, err = strconv.ParseUint(v, 10, 64)
+			d = append(d, util.Usec(fval))
+		} else if strings.Index(l, "cpu.stat") == 0 {
+			// cpu.stat
+			current, err := strconv.ParseUint(v, 10, 64)
 			if err != nil {
 				panic(err)
 			}
 			if prev, ok := total.Items[l]; ok {
 				if strings.Index(l, "throttled_time") > 0 {
-					d = append(d, util.UsecPerSec(util.Round(float64(t-prev)/1000)))
+					d = append(d, util.UsecPerSec(util.Round(float64(current-prev)/1000)))
 				} else {
-					d = append(d, fmt.Sprintf("%v       ", t-prev))
+					d = append(d, fmt.Sprintf("%v       ", current-prev))
 				}
 			} else {
 				d = append(d, "-       ")
 			}
-			total.Items[l] = t
-			label.Items = append(label.Items, l)
+			total.Items[l] = current
+		} else {
+			d = append(d, fmt.Sprintf("%v       ", v))
 		}
+	}
+
+	// cpuacct
+	cpuAcctLabel, cpuAcctValue := c.CPUAcct(cpath)
+	for k, v := range cpuAcctValue {
+		l := fmt.Sprintf("%s:", cpuAcctLabel[k])
+		label.Items = append(label.Items, l)
+		current, err := strconv.ParseUint(v, 10, 64)
+		total.Items[l] = current
+		if err != nil {
+			panic(err)
+		}
+		if prev, ok := total.Items[l]; ok {
+			if strings.Index(l, "cpuacct.usage") == 0 {
+				d = append(d, util.UsecPerSec(util.Round(float64(current-prev)/1000)))
+			} else {
+				d = append(d, util.UsecPerSec(util.Round(float64(current-prev)/tick*1000000)))
+			}
+		} else {
+			d = append(d, "-       ")
+		}
+	}
+
+	// cpuset
+	cpuSetLabel, cpuSetValue := c.CPUSet(cpath)
+	for k, v := range cpuSetValue {
+		l := fmt.Sprintf("%s:", cpuSetLabel[k])
+		label.Items = append(label.Items, l)
+		d = append(d, fmt.Sprintf("%v       ", v))
 	}
 
 	maxlen := 1

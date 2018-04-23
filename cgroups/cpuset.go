@@ -18,40 +18,30 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package cmd
+package cgroups
 
 import (
-	"fmt"
-	"github.com/gizak/termui"
-	"github.com/k1LoW/cgrps/cgroups"
+	"strings"
 )
 
-func NewCgroupStat(cpath string) (*termui.List, *termui.List) {
-	label := termui.NewList()
-	label.Border = false
-	label.ItemFgColor = termui.ColorGreen
-	label.Items = []string{
-		"  cgroup path:",
-		"  cgroup.procs:",
-		"  subsystems:",
+// CPUSet return cgroups cpuset values
+func (c *Cgroups) CPUSet(cpath string) ([]string, []string) {
+	label := []string{}
+	value := []string{}
+
+	// params
+	var params = []string{
+		"cpuset.cpus",
+		"cpuset.mems",
 	}
-	label.Height = 4
-
-	data := termui.NewList()
-	data.Border = false
-	data.Items = []string{
-		cpath, "-", "-",
+	for _, p := range params {
+		splited := strings.SplitN(p, ".", 2)
+		v, err := c.ReadSimple(cpath, splited[0], p)
+		if v != "" && err == nil {
+			label = append(label, p)
+			value = append(value, v)
+		}
 	}
-	data.Height = 4
 
-	return label, data
-}
-
-func DrawCgroupStat(cpath string, label *termui.List, data *termui.List) {
-	c := cgroups.Cgroups{FsPath: "/sys/fs/cgroup"}
-	pids := c.Pids(cpath)
-	// cgroup.procs
-	data.Items[1] = fmt.Sprintf("%d", len(pids))
-	// subsystems
-	data.Items[2] = fmt.Sprintf("%v", c.EnabledSubsystems(cpath))
+	return label, value
 }

@@ -18,61 +18,49 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package cmd
+package cgroups
 
 import (
+	"bufio"
 	"fmt"
-	"github.com/gizak/termui"
-	"github.com/k1LoW/cgrps/cgroups"
+	"strings"
 )
 
-func NewBlkioStat() (*termui.Par, *termui.List, *termui.List) {
-	title := termui.NewPar("BLKIO")
-	title.Height = 1
-	title.Border = false
+// CPUAcct return cgroups cpuacct values
+func (c *Cgroups) CPUAcct(cpath string) ([]string, []string) {
+	label := []string{}
+	value := []string{}
 
-	label := termui.NewList()
-	label.Border = false
-	label.ItemFgColor = termui.ColorCyan
-	label.Items = []string{}
-	label.Height = len(label.Items)
-
-	data := termui.NewList()
-	data.Border = false
-	data.Items = []string{}
-	data.Height = len(label.Items)
-
-	return title, label, data
-}
-
-func DrawBlkioStat(cpath string, label *termui.List, data *termui.List) {
-	c := cgroups.Cgroups{FsPath: "/sys/fs/cgroup"}
-	if !c.IsEnableSubsystem(cpath, "blkio") {
-		return
+	// params
+	var params = []string{
+		"cpuacct.usage",
 	}
-
-	d := []string{}
-
-	// blkio
-	blkioLabel, blkioValue := c.Blkio(cpath)
-	for k, v := range blkioValue {
-		l := fmt.Sprintf("%s:", blkioLabel[k])
-		label.Items = append(label.Items, l)
-		d = append(d, fmt.Sprintf("%v", v))
-	}
-
-	maxlen := 1
-	for _, v := range d {
-		if maxlen < len(v) {
-			maxlen = len(v)
+	for _, p := range params {
+		splited := strings.SplitN(p, ".", 2)
+		v, err := c.ReadSimple(cpath, splited[0], p)
+		if v != "" && err == nil {
+			label = append(label, p)
+			value = append(value, v)
 		}
 	}
 
-	data.Items = nil
-	for _, v := range d {
-		data.Items = append(data.Items, fmt.Sprintf(fmt.Sprintf("%%%ds", maxlen), v))
+	// stat
+	stat, err := c.ReadSimple(cpath, "cpuacct", "cpuacct.stat")
+	if err == nil {
+		in := strings.NewReader(stat)
+		scanner := bufio.NewScanner(in)
+
+		for scanner.Scan() {
+			line := scanner.Text()
+			splited := strings.SplitN(line, " ", 2)
+			s := fmt.Sprintf("cpuacct.stat.%s", splited[0])
+			v := splited[1]
+			label = append(label, s)
+			value = append(value, v)
+		}
 	}
 
-	label.Height = len(data.Items)
-	data.Height = len(data.Items)
+	// @todo cpuacct.usage_percpu
+
+	return label, value
 }
