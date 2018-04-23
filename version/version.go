@@ -1,4 +1,4 @@
-package main
+package version
 
 // Name for this
 const Name string = "cgrps"
