@@ -74,7 +74,7 @@ var statCmd = &cobra.Command{
 			),
 			termui.NewRow(
 				termui.NewCol(2, 0, cgroupLabel),
-				termui.NewCol(6, 0, cgroupData),
+				termui.NewCol(10, 0, cgroupData),
 			),
 		)
 
