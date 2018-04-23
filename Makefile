@@ -29,12 +29,12 @@ depsdev:
 	go get github.com/Songmu/ghch/cmd/ghch
 
 crossbuild: deps depsdev
-	$(eval ver = v$(shell gobump show -r))
+	$(eval ver = v$(shell gobump show -r version/))
 	goxz -pv=$(ver) -os=linux -arch=386,amd64 -build-ldflags="$(RELEASE_BUILD_LDFLAGS)" \
 	  -d=./dist/$(ver)
 
 release: crossbuild
-	$(eval ver = v$(shell gobump show -r))
+	$(eval ver = v$(shell gobump show -r version/))
 	ghr -username k1LoW -replace ${ver} dist/${ver}
 
 .PHONY: default test deps cover
