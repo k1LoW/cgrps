@@ -26,6 +26,7 @@ import (
 	"github.com/k1LoW/cgrps/cgroups"
 )
 
+// NewBlkioStat create new Blkio stat vals
 func NewBlkioStat() (*termui.Par, *termui.List, *termui.List) {
 	title := termui.NewPar("BLKIO")
 	title.Height = 1
@@ -45,6 +46,7 @@ func NewBlkioStat() (*termui.Par, *termui.List, *termui.List) {
 	return title, label, data
 }
 
+// DrawBlkioStat gather Blkio stat vals and set
 func DrawBlkioStat(cpath string, label *termui.List, data *termui.List) {
 	c := cgroups.Cgroups{FsPath: "/sys/fs/cgroup"}
 	if !c.IsEnableSubsystem(cpath, "blkio") {

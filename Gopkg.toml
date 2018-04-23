@@ -24,16 +24,8 @@
 #   go-tests = true
 #   unused-packages = true
 [[constraint]]
-  branch = "master"
-  name = "github.com/mitchellh/go-homedir"
-
-[[constraint]]
   name = "github.com/spf13/cobra"
   version = "0.0.2"
-
-[[constraint]]
-  name = "github.com/spf13/viper"
-  version = "1.0.2"
 
 [prune]
   go-tests = true

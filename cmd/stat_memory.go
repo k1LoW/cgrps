@@ -28,6 +28,7 @@ import (
 	"strings"
 )
 
+// NewMemoryStat create new Memory stat vals
 func NewMemoryStat() (*termui.Par, *termui.List, *termui.List) {
 	title := termui.NewPar("MEMORY")
 	title.Height = 1
@@ -56,6 +57,7 @@ var cgroupMemory = []string{
 	"memory.memsw.limit_in_bytes",
 }
 
+// DrawMemoryStat gather Memory stat vals and set
 func DrawMemoryStat(cpath string, label *termui.List, data *termui.List) {
 	c := cgroups.Cgroups{FsPath: "/sys/fs/cgroup"}
 	if !c.IsEnableSubsystem(cpath, "memory") {
