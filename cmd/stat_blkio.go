@@ -23,7 +23,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/gizak/termui"
-	"github.com/k1LoW/cgrps/util"
+	"github.com/k1LoW/cgrps/cgroups"
 	"strings"
 )
 
@@ -78,7 +78,7 @@ var cgroupBlkio = []string{
 }
 
 func DrawBlkioStat(cpath string, label *termui.List, data *termui.List) {
-	c := util.Cgroups{FsPath: "/sys/fs/cgroup"}
+	c := cgroups.Cgroups{FsPath: "/sys/fs/cgroup"}
 	if !c.IsEnableSubsystem(cpath, "blkio") {
 		return
 	}

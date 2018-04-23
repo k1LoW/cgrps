@@ -23,7 +23,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/gizak/termui"
-	"github.com/k1LoW/cgrps/util"
+	"github.com/k1LoW/cgrps/cgroups"
 	"os"
 )
 
@@ -49,7 +49,7 @@ func NewCgroupStat(cpath string) (*termui.List, *termui.List) {
 }
 
 func DrawCgroupStat(cpath string, label *termui.List, data *termui.List) {
-	c := util.Cgroups{FsPath: "/sys/fs/cgroup"}
+	c := cgroups.Cgroups{FsPath: "/sys/fs/cgroup"}
 	processes, err := c.Processes(cpath)
 	if err != nil {
 		fmt.Println(err)

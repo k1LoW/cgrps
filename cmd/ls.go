@@ -22,7 +22,7 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/k1LoW/cgrps/util"
+	"github.com/k1LoW/cgrps/cgroups"
 	"github.com/spf13/cobra"
 	"os"
 )
@@ -34,7 +34,7 @@ var lsCmd = &cobra.Command{
 	Long:  `list cgroups.`,
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		c := util.Cgroups{FsPath: "/sys/fs/cgroup"}
+		c := cgroups.Cgroups{FsPath: "/sys/fs/cgroup"}
 		cs, err := c.List()
 		if err != nil {
 			fmt.Println(err)

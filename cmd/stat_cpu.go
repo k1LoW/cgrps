@@ -24,6 +24,7 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/gizak/termui"
+	"github.com/k1LoW/cgrps/cgroups"
 	"github.com/k1LoW/cgrps/util"
 	"strconv"
 	"strings"
@@ -68,7 +69,7 @@ var cgroupCPU = []string{
 
 // DrawCPUStat gather CPU stat vals and set
 func DrawCPUStat(cpath string, label *termui.List, data *termui.List, total *CPUStat) {
-	c := util.Cgroups{FsPath: "/sys/fs/cgroup"}
+	c := cgroups.Cgroups{FsPath: "/sys/fs/cgroup"}
 	if !c.IsEnableSubsystem(cpath, "cpuset") && !c.IsEnableSubsystem(cpath, "cpuacct") && !c.IsEnableSubsystem(cpath, "cpu") {
 		return
 	}
@@ -76,7 +77,7 @@ func DrawCPUStat(cpath string, label *termui.List, data *termui.List, total *CPU
 	d := []string{}
 	var l string
 	var t uint64
-	tick := util.ClkTck()
+	tick := cgroups.ClkTck()
 
 	// cgroupCPU
 	for _, s := range cgroupCPU {

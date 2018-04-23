@@ -23,7 +23,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"github.com/k1LoW/cgrps/util"
+	"github.com/k1LoW/cgrps/cgroups"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh/terminal"
 	"io/ioutil"
@@ -55,7 +55,7 @@ var psCmd = &cobra.Command{
 			cpath = strings.TrimRight(string(b), "\n")
 		}
 
-		c := util.Cgroups{FsPath: "/sys/fs/cgroup"}
+		c := cgroups.Cgroups{FsPath: "/sys/fs/cgroup"}
 		processes, err := c.Processes(cpath)
 		if err != nil {
 			fmt.Println(err)

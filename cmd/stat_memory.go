@@ -24,6 +24,7 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/gizak/termui"
+	"github.com/k1LoW/cgrps/cgroups"
 	"github.com/k1LoW/cgrps/util"
 	"strings"
 )
@@ -57,7 +58,7 @@ var cgroupMemory = []string{
 }
 
 func DrawMemoryStat(cpath string, label *termui.List, data *termui.List) {
-	c := util.Cgroups{FsPath: "/sys/fs/cgroup"}
+	c := cgroups.Cgroups{FsPath: "/sys/fs/cgroup"}
 	if !c.IsEnableSubsystem(cpath, "memory") {
 		return
 	}

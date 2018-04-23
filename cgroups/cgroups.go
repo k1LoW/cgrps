@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package util
+package cgroups
 
 import (
 	"bufio"
@@ -121,10 +121,25 @@ func (c *Cgroups) IsEnableSubsystem(cpath string, sname string) bool {
 
 // Processes return processe info in specific cgroup path
 func (c *Cgroups) Processes(cpath string) ([]ps.Process, error) {
+	pids := c.Pids(cpath)
+	processes := []ps.Process{}
+
+	for _, pid := range pids {
+		pr, err := ps.FindProcess(pid)
+		if err != nil {
+			return processes, err
+		}
+		processes = append(processes, pr)
+	}
+
+	return processes, nil
+}
+
+// Pids return pids in specific cgroup path
+func (c *Cgroups) Pids(cpath string) []int {
 	subsys := c.EnabledSubsystems(cpath)
 
 	pids := []int{}
-	processes := []ps.Process{}
 	encountered := make(map[int]bool)
 
 	for _, s := range subsys {
@@ -159,21 +174,13 @@ func (c *Cgroups) Processes(cpath string) ([]ps.Process, error) {
 			return nil
 		})
 		if err != nil {
-			return processes, err
+			return pids
 		}
 	}
 
 	sort.Ints(pids)
 
-	for _, pid := range pids {
-		pr, err := ps.FindProcess(pid)
-		if err != nil {
-			return processes, err
-		}
-		processes = append(processes, pr)
-	}
-
-	return processes, nil
+	return pids
 }
 
 // ReadSimple read file and return value as string
