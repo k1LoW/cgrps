@@ -44,7 +44,7 @@ func TestIsEnabledSubsystem(t *testing.T) {
 
 func TestProcesses(t *testing.T) {
 	c := Cgroups{FsPath: testFs()}
-	ps, err := c.Processes("/my-cgroup")
+	ps, err := c.Processes([]string{"/my-cgroup"})
 	if err != nil {
 		t.Error(err)
 	}
