@@ -49,7 +49,8 @@ func NewCgroupStat(cpath string) (*termui.List, *termui.List) {
 
 func DrawCgroupStat(cpath string, label *termui.List, data *termui.List) {
 	c := cgroups.Cgroups{FsPath: "/sys/fs/cgroup"}
-	pids := c.Pids(cpath)
+	cpaths := []string{cpath}
+	pids := c.Pids(cpaths)
 	// cgroup.procs
 	data.Items[1] = fmt.Sprintf("%d", len(pids))
 	// subsystems

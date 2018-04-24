@@ -46,17 +46,17 @@ var psCmd = &cobra.Command{
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		var cpath string
+		var cpaths []string
 
 		if terminal.IsTerminal(0) {
-			cpath = args[0]
+			cpaths = args
 		} else {
 			b, _ := ioutil.ReadAll(os.Stdin)
-			cpath = strings.TrimRight(string(b), "\n")
+			cpaths = strings.Split(string(b), "\n")
 		}
 
 		c := cgroups.Cgroups{FsPath: "/sys/fs/cgroup"}
-		processes, err := c.Processes(cpath)
+		processes, err := c.Processes(cpaths)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)

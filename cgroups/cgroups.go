@@ -120,8 +120,8 @@ func (c *Cgroups) IsEnableSubsystem(cpath string, sname string) bool {
 }
 
 // Processes return processe info in specific cgroup path
-func (c *Cgroups) Processes(cpath string) ([]ps.Process, error) {
-	pids := c.Pids(cpath)
+func (c *Cgroups) Processes(cpaths []string) ([]ps.Process, error) {
+	pids := c.Pids(cpaths)
 	processes := []ps.Process{}
 
 	for _, pid := range pids {
@@ -136,11 +136,30 @@ func (c *Cgroups) Processes(cpath string) ([]ps.Process, error) {
 }
 
 // Pids return pids in specific cgroup path
-func (c *Cgroups) Pids(cpath string) []int {
+func (c *Cgroups) Pids(cpaths []string) []int {
+	all := []int{}
+	encountered := make(map[int]bool)
+	for _, cpath := range cpaths {
+		all = append(all, c.pids(cpath)...)
+	}
+
+	merged := []int{}
+	for _, pid := range all {
+		if !encountered[pid] {
+			encountered[pid] = true
+			merged = append(merged, pid)
+		}
+	}
+
+	sort.Ints(merged)
+
+	return merged
+}
+
+func (c *Cgroups) pids(cpath string) []int {
 	subsys := c.EnabledSubsystems(cpath)
 
 	pids := []int{}
-	encountered := make(map[int]bool)
 
 	for _, s := range subsys {
 		path := fmt.Sprintf("%s/%s%s", c.FsPath, s, cpath)
@@ -165,10 +184,7 @@ func (c *Cgroups) Pids(cpath string) []int {
 					if err != nil {
 						return err
 					}
-					if !encountered[pid] {
-						encountered[pid] = true
-						pids = append(pids, pid)
-					}
+					pids = append(pids, pid)
 				}
 			}
 			return nil
@@ -177,8 +193,6 @@ func (c *Cgroups) Pids(cpath string) []int {
 			return pids
 		}
 	}
-
-	sort.Ints(pids)
 
 	return pids
 }

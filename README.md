@@ -1,4 +1,4 @@
-# cgrps
+# cgrps [![Build Status](https://travis-ci.org/k1LoW/cgrps.svg?branch=master)](https://travis-ci.org/k1LoW/cgrps)
 
 `cgrps` is a set of commands for checking cgroups.
 
