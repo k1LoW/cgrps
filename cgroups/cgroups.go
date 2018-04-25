@@ -173,19 +173,24 @@ func (c *Cgroups) pids(h string) []int {
 			}
 			procs, err := os.Open(filepath.Join(path, "cgroup.procs"))
 			if err != nil {
+				_ = procs.Close()
 				return err
 			}
-			defer procs.Close()
 
 			scanner := bufio.NewScanner(procs)
 			for scanner.Scan() {
 				if t := scanner.Text(); t != "" {
 					pid, err := strconv.Atoi(t)
 					if err != nil {
+						_ = procs.Close()
 						return err
 					}
 					pids = append(pids, pid)
 				}
+			}
+			err = procs.Close()
+			if err != nil {
+				return err
 			}
 			return nil
 		})
