@@ -34,6 +34,15 @@ type CPUStat struct {
 	Items map[string]uint64
 }
 
+// IsEnabledCPUStat return CPU stat enabled or not
+func IsEnabledCPUStat(h string) bool {
+	c := cgroups.Cgroups{FsPath: "/sys/fs/cgroup"}
+	if c.IsAttachedSubsystem(h, "cpuset") || c.IsAttachedSubsystem(h, "cpuacct") || c.IsAttachedSubsystem(h, "cpu") {
+		return true
+	}
+	return false
+}
+
 // NewCPUStat create new CPU stat vals
 func NewCPUStat() (*termui.Par, *termui.List, *termui.List, *CPUStat) {
 	title := termui.NewPar("CPU/CPUSet/CPUAcct")
@@ -58,9 +67,9 @@ func NewCPUStat() (*termui.Par, *termui.List, *termui.List, *CPUStat) {
 }
 
 // DrawCPUStat gather CPU stat vals and set
-func DrawCPUStat(cpath string, label *termui.List, data *termui.List, total *CPUStat) {
+func DrawCPUStat(h string, label *termui.List, data *termui.List, total *CPUStat) {
 	c := cgroups.Cgroups{FsPath: "/sys/fs/cgroup"}
-	if !c.IsEnableSubsystem(cpath, "cpuset") && !c.IsEnableSubsystem(cpath, "cpuacct") && !c.IsEnableSubsystem(cpath, "cpu") {
+	if !IsEnabledCPUStat(h) {
 		return
 	}
 
@@ -69,7 +78,7 @@ func DrawCPUStat(cpath string, label *termui.List, data *termui.List, total *CPU
 	tick := cgroups.ClkTck()
 
 	// cpu
-	cpuLabel, cpuValue := c.CPU(cpath)
+	cpuLabel, cpuValue := c.CPU(h)
 	for k, v := range cpuValue {
 		l := fmt.Sprintf("%s:", cpuLabel[k])
 		label.Items = append(label.Items, l)
@@ -101,7 +110,7 @@ func DrawCPUStat(cpath string, label *termui.List, data *termui.List, total *CPU
 	}
 
 	// cpuacct
-	cpuAcctLabel, cpuAcctValue := c.CPUAcct(cpath)
+	cpuAcctLabel, cpuAcctValue := c.CPUAcct(h)
 	for k, v := range cpuAcctValue {
 		l := fmt.Sprintf("%s:", cpuAcctLabel[k])
 		label.Items = append(label.Items, l)
@@ -122,7 +131,7 @@ func DrawCPUStat(cpath string, label *termui.List, data *termui.List, total *CPU
 	}
 
 	// cpuset
-	cpuSetLabel, cpuSetValue := c.CPUSet(cpath)
+	cpuSetLabel, cpuSetValue := c.CPUSet(h)
 	for k, v := range cpuSetValue {
 		l := fmt.Sprintf("%s:", cpuSetLabel[k])
 		label.Items = append(label.Items, l)

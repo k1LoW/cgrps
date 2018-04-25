@@ -57,10 +57,19 @@ var cgroupMemory = []string{
 	"memory.memsw.limit_in_bytes",
 }
 
-// DrawMemoryStat gather Memory stat vals and set
-func DrawMemoryStat(cpath string, label *termui.List, data *termui.List) {
+// IsEnabledMemoryStat return Memory stat enabled or not
+func IsEnabledMemoryStat(h string) bool {
 	c := cgroups.Cgroups{FsPath: "/sys/fs/cgroup"}
-	if !c.IsEnableSubsystem(cpath, "memory") {
+	if c.IsAttachedSubsystem(h, "memory") {
+		return true
+	}
+	return false
+}
+
+// DrawMemoryStat gather Memory stat vals and set
+func DrawMemoryStat(h string, label *termui.List, data *termui.List) {
+	c := cgroups.Cgroups{FsPath: "/sys/fs/cgroup"}
+	if !IsEnabledMemoryStat(h) {
 		return
 	}
 
@@ -68,7 +77,7 @@ func DrawMemoryStat(cpath string, label *termui.List, data *termui.List) {
 	label.Items = []string{}
 
 	// memory
-	memoryLabel, memoryValue := c.Memory(cpath)
+	memoryLabel, memoryValue := c.Memory(h)
 	total := make(map[string]string)
 	for k, v := range memoryLabel {
 		if strings.Index(v, "memory.stat.total_") == 0 {

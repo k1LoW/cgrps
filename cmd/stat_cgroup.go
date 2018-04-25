@@ -26,12 +26,13 @@ import (
 	"github.com/k1LoW/cgrps/cgroups"
 )
 
-func NewCgroupStat(cpath string) (*termui.List, *termui.List) {
+// NewCgroupStat create new Cgroup stat vals
+func NewCgroupStat(h string) (*termui.List, *termui.List) {
 	label := termui.NewList()
 	label.Border = false
 	label.ItemFgColor = termui.ColorGreen
 	label.Items = []string{
-		"  cgroup path:",
+		"  cgroup hierarchy:",
 		"  cgroup.procs:",
 		"  subsystems:",
 	}
@@ -40,19 +41,19 @@ func NewCgroupStat(cpath string) (*termui.List, *termui.List) {
 	data := termui.NewList()
 	data.Border = false
 	data.Items = []string{
-		cpath, "-", "-",
+		h, "-", "-",
 	}
 	data.Height = 4
 
 	return label, data
 }
 
-func DrawCgroupStat(cpath string, label *termui.List, data *termui.List) {
+// DrawCgroupStat gather cgroup stat vals and set
+func DrawCgroupStat(h string, label *termui.List, data *termui.List) {
 	c := cgroups.Cgroups{FsPath: "/sys/fs/cgroup"}
-	cpaths := []string{cpath}
-	pids := c.Pids(cpaths)
+	pids := c.Pids([]string{h})
 	// cgroup.procs
 	data.Items[1] = fmt.Sprintf("%d", len(pids))
 	// subsystems
-	data.Items[2] = fmt.Sprintf("%v", c.EnabledSubsystems(cpath))
+	data.Items[2] = fmt.Sprintf("%v", c.AttachedSubsystems(h))
 }

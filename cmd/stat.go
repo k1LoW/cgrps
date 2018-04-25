@@ -26,6 +26,7 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh/terminal"
 	"io/ioutil"
+	"math"
 	"os"
 	"strings"
 )
@@ -44,13 +45,13 @@ var statCmd = &cobra.Command{
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		var cpath string
+		var h string
 
 		if terminal.IsTerminal(0) {
-			cpath = args[0]
+			h = args[0]
 		} else {
 			b, _ := ioutil.ReadAll(os.Stdin)
-			cpath = strings.TrimRight(string(b), "\n")
+			h = strings.TrimRight(string(b), "\n")
 		}
 
 		err := termui.Init()
@@ -62,11 +63,7 @@ var statCmd = &cobra.Command{
 		title := termui.NewPar("stat")
 		title.Height = 1
 		title.Border = false
-		cgroupLabel, cgroupData := NewCgroupStat(cpath)
-
-		cpuTitle, cpuLabel, cpuData, cpuDataTotal := NewCPUStat()
-		memoryTitle, memoryLabel, memoryData := NewMemoryStat()
-		blkioTitle, blkioLabel, blkioData := NewBlkioStat()
+		cgroupLabel, cgroupData := NewCgroupStat(h)
 
 		termui.Body.AddRows(
 			termui.NewRow(
@@ -78,21 +75,57 @@ var statCmd = &cobra.Command{
 			),
 		)
 
-		termui.Body.AddRows(
-			termui.NewRow(
-				termui.NewCol(2, 0, cpuTitle),
-				termui.NewCol(2, 2, memoryTitle),
-				termui.NewCol(2, 2, blkioTitle),
-			),
-			termui.NewRow(
-				termui.NewCol(2, 0, cpuLabel),
-				termui.NewCol(2, 0, cpuData),
-				termui.NewCol(2, 0, memoryLabel),
-				termui.NewCol(2, 0, memoryData),
-				termui.NewCol(2, 0, blkioLabel),
-				termui.NewCol(2, 0, blkioData),
-			),
-		)
+		cpuTitle, cpuLabel, cpuData, cpuDataTotal := NewCPUStat()
+		memoryTitle, memoryLabel, memoryData := NewMemoryStat()
+		blkioTitle, blkioLabel, blkioData := NewBlkioStat()
+
+		titleLists := []*termui.Par{}
+		labelLists := []*termui.List{}
+		dataLists := []*termui.List{}
+
+		if IsEnabledCPUStat(h) {
+			titleLists = append(titleLists, cpuTitle)
+			labelLists = append(labelLists, cpuLabel)
+			dataLists = append(dataLists, cpuData)
+		}
+		if IsEnabledMemoryStat(h) {
+			titleLists = append(titleLists, memoryTitle)
+			labelLists = append(labelLists, memoryLabel)
+			dataLists = append(dataLists, memoryData)
+		}
+		if IsEnabledBlkioStat(h) {
+			titleLists = append(titleLists, blkioTitle)
+			labelLists = append(labelLists, blkioLabel)
+			dataLists = append(dataLists, blkioData)
+		}
+
+		row := int(math.Ceil(float64(len(titleLists)) / 3))
+		for i := 0; i < row; i++ {
+			t := []*termui.Row{}
+			d := []*termui.Row{}
+
+			if len(titleLists) > i {
+				t = append(t, termui.NewCol(2, 0, titleLists[i]))
+				d = append(d, termui.NewCol(2, 0, labelLists[i]))
+				d = append(d, termui.NewCol(2, 0, dataLists[i]))
+			}
+			if len(titleLists) > i+1 {
+				t = append(t, termui.NewCol(2, 2, titleLists[i+1]))
+				d = append(d, termui.NewCol(2, 0, labelLists[i+1]))
+				d = append(d, termui.NewCol(2, 0, dataLists[i+1]))
+			}
+			if len(titleLists) > i+2 {
+				t = append(t, termui.NewCol(2, 2, titleLists[i+2]))
+				d = append(d, termui.NewCol(2, 0, labelLists[i+2]))
+				d = append(d, termui.NewCol(2, 0, dataLists[i+2]))
+			}
+			termui.Body.AddRows(
+				termui.NewRow(t...),
+			)
+			termui.Body.AddRows(
+				termui.NewRow(d...),
+			)
+		}
 
 		termui.Body.Align()
 
@@ -106,10 +139,10 @@ var statCmd = &cobra.Command{
 		})
 
 		termui.Handle("/timer/1s", func(e termui.Event) {
-			DrawCgroupStat(cpath, cgroupLabel, cgroupData)
-			DrawCPUStat(cpath, cpuLabel, cpuData, cpuDataTotal)
-			DrawMemoryStat(cpath, memoryLabel, memoryData)
-			DrawBlkioStat(cpath, blkioLabel, blkioData)
+			DrawCgroupStat(h, cgroupLabel, cgroupData)
+			DrawCPUStat(h, cpuLabel, cpuData, cpuDataTotal)
+			DrawMemoryStat(h, memoryLabel, memoryData)
+			DrawBlkioStat(h, blkioLabel, blkioData)
 
 			termui.Render(termui.Body)
 		})

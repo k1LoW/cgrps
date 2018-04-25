@@ -25,7 +25,7 @@ import (
 )
 
 // Blkio return cgroups Blkio values
-func (c *Cgroups) Blkio(cpath string) ([]string, []string) {
+func (c *Cgroups) Blkio(h string) ([]string, []string) {
 	label := []string{}
 	value := []string{}
 
@@ -59,7 +59,7 @@ func (c *Cgroups) Blkio(cpath string) ([]string, []string) {
 
 	for _, p := range params {
 		splited := strings.SplitN(p, ".", 2)
-		v, err := c.ReadSimple(cpath, splited[0], p)
+		v, err := c.ReadSimple(h, splited[0], p)
 		if v != "" && err == nil {
 			label = append(label, p)
 			value = append(value, v)

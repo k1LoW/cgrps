@@ -18,9 +18,9 @@ func TestList(t *testing.T) {
 	}
 }
 
-func TestEnabledSubsystems(t *testing.T) {
+func TestAttachedSubsystems(t *testing.T) {
 	c := Cgroups{FsPath: testFs()}
-	subsystems := c.EnabledSubsystems("/my-cgroup")
+	subsystems := c.AttachedSubsystems("/my-cgroup")
 	actual := len(subsystems)
 	expected := 4
 	if actual != expected {
@@ -28,14 +28,14 @@ func TestEnabledSubsystems(t *testing.T) {
 	}
 }
 
-func TestIsEnabledSubsystem(t *testing.T) {
+func TestIsAttacheddSubsystem(t *testing.T) {
 	c := Cgroups{FsPath: testFs()}
-	actual := c.IsEnableSubsystem("/my-cgroup", "cpu,cpuacct")
+	actual := c.IsAttachedSubsystem("/my-cgroup", "cpu,cpuacct")
 	expected := true
 	if actual != expected {
 		t.Errorf("actual %v\nwant %v", actual, expected)
 	}
-	actual = c.IsEnableSubsystem("/my-cgroup", "devices")
+	actual = c.IsAttachedSubsystem("/my-cgroup", "devices")
 	expected = false
 	if actual != expected {
 		t.Errorf("actual %v\nwant %v", actual, expected)

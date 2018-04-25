@@ -27,7 +27,7 @@ import (
 )
 
 // Memory return cgroups memory values
-func (c *Cgroups) Memory(cpath string) ([]string, []string) {
+func (c *Cgroups) Memory(h string) ([]string, []string) {
 	label := []string{}
 	value := []string{}
 
@@ -42,7 +42,7 @@ func (c *Cgroups) Memory(cpath string) ([]string, []string) {
 	}
 	for _, p := range params {
 		splited := strings.SplitN(p, ".", 2)
-		v, err := c.ReadSimple(cpath, splited[0], p)
+		v, err := c.ReadSimple(h, splited[0], p)
 		if v != "" && err == nil {
 			label = append(label, p)
 			value = append(value, v)
@@ -50,7 +50,7 @@ func (c *Cgroups) Memory(cpath string) ([]string, []string) {
 	}
 
 	// stat
-	stat, err := c.ReadSimple(cpath, "memory", "memory.stat")
+	stat, err := c.ReadSimple(h, "memory", "memory.stat")
 	if err == nil {
 		in := strings.NewReader(stat)
 		scanner := bufio.NewScanner(in)

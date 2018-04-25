@@ -27,7 +27,7 @@ import (
 )
 
 // CPU return cgroups cpu values
-func (c *Cgroups) CPU(cpath string) ([]string, []string) {
+func (c *Cgroups) CPU(h string) ([]string, []string) {
 	label := []string{}
 	value := []string{}
 
@@ -41,7 +41,7 @@ func (c *Cgroups) CPU(cpath string) ([]string, []string) {
 	}
 	for _, p := range params {
 		splited := strings.SplitN(p, ".", 2)
-		v, err := c.ReadSimple(cpath, splited[0], p)
+		v, err := c.ReadSimple(h, splited[0], p)
 		if v != "" && err == nil {
 			label = append(label, p)
 			value = append(value, v)
@@ -49,7 +49,7 @@ func (c *Cgroups) CPU(cpath string) ([]string, []string) {
 	}
 
 	// stat
-	stat, err := c.ReadSimple(cpath, "cpu", "cpu.stat")
+	stat, err := c.ReadSimple(h, "cpu", "cpu.stat")
 	if err == nil {
 		in := strings.NewReader(stat)
 		scanner := bufio.NewScanner(in)

@@ -26,6 +26,15 @@ import (
 	"github.com/k1LoW/cgrps/cgroups"
 )
 
+// IsEnabledBlkioStat return Memory stat enabled or not
+func IsEnabledBlkioStat(h string) bool {
+	c := cgroups.Cgroups{FsPath: "/sys/fs/cgroup"}
+	if c.IsAttachedSubsystem(h, "blkio") {
+		return true
+	}
+	return false
+}
+
 // NewBlkioStat create new Blkio stat vals
 func NewBlkioStat() (*termui.Par, *termui.List, *termui.List) {
 	title := termui.NewPar("BLKIO")
@@ -47,16 +56,16 @@ func NewBlkioStat() (*termui.Par, *termui.List, *termui.List) {
 }
 
 // DrawBlkioStat gather Blkio stat vals and set
-func DrawBlkioStat(cpath string, label *termui.List, data *termui.List) {
+func DrawBlkioStat(h string, label *termui.List, data *termui.List) {
 	c := cgroups.Cgroups{FsPath: "/sys/fs/cgroup"}
-	if !c.IsEnableSubsystem(cpath, "blkio") {
+	if !IsEnabledBlkioStat(h) {
 		return
 	}
 
 	d := []string{}
 
 	// blkio
-	blkioLabel, blkioValue := c.Blkio(cpath)
+	blkioLabel, blkioValue := c.Blkio(h)
 	for k, v := range blkioValue {
 		l := fmt.Sprintf("%s:", blkioLabel[k])
 		label.Items = append(label.Items, l)

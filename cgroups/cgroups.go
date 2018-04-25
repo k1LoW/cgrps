@@ -68,9 +68,9 @@ type Cgroups struct {
 	FsPath string
 }
 
-// List show all cgroups path
+// List show all cgroup hierarchies
 func (c *Cgroups) List() ([]string, error) {
-	subsys := c.EnabledSubsystems("/")
+	subsys := c.AttachedSubsystems("/")
 
 	cs := []string{"/"}
 	encountered := make(map[string]bool)
@@ -97,11 +97,11 @@ func (c *Cgroups) List() ([]string, error) {
 	return cs, nil
 }
 
-// EnabledSubsystems return active subsystem in specific cgroup path
-func (c *Cgroups) EnabledSubsystems(cpath string) []string {
+// AttachedSubsystems return active subsystem in specific cgroup hierarchy
+func (c *Cgroups) AttachedSubsystems(h string) []string {
 	enabled := []string{}
 	for _, s := range Subsystems {
-		path := fmt.Sprintf("%s/%s%s", c.FsPath, s, cpath)
+		path := fmt.Sprintf("%s/%s%s", c.FsPath, s, h)
 		if _, err := os.Lstat(path); err != nil {
 			continue
 		}
@@ -110,18 +110,18 @@ func (c *Cgroups) EnabledSubsystems(cpath string) []string {
 	return enabled
 }
 
-// IsEnableSubsystem return subsystem is active or not in specific cgroup path
-func (c *Cgroups) IsEnableSubsystem(cpath string, sname string) bool {
-	path := fmt.Sprintf("%s/%s%s", c.FsPath, sname, cpath)
+// IsAttachedSubsystem return subsystem is active or not in specific cgroup hierarchy
+func (c *Cgroups) IsAttachedSubsystem(h string, sname string) bool {
+	path := fmt.Sprintf("%s/%s%s", c.FsPath, sname, h)
 	if _, err := os.Lstat(path); err != nil {
 		return false
 	}
 	return true
 }
 
-// Processes return processe info in specific cgroup path
-func (c *Cgroups) Processes(cpaths []string) ([]ps.Process, error) {
-	pids := c.Pids(cpaths)
+// Processes return processe info in specific cgroup hierarchy
+func (c *Cgroups) Processes(hs []string) ([]ps.Process, error) {
+	pids := c.Pids(hs)
 	processes := []ps.Process{}
 
 	for _, pid := range pids {
@@ -135,12 +135,12 @@ func (c *Cgroups) Processes(cpaths []string) ([]ps.Process, error) {
 	return processes, nil
 }
 
-// Pids return pids in specific cgroup path
-func (c *Cgroups) Pids(cpaths []string) []int {
+// Pids return pids in specific cgroup hierarchy
+func (c *Cgroups) Pids(hs []string) []int {
 	all := []int{}
 	encountered := make(map[int]bool)
-	for _, cpath := range cpaths {
-		all = append(all, c.pids(cpath)...)
+	for _, h := range hs {
+		all = append(all, c.pids(h)...)
 	}
 
 	merged := []int{}
@@ -156,13 +156,13 @@ func (c *Cgroups) Pids(cpaths []string) []int {
 	return merged
 }
 
-func (c *Cgroups) pids(cpath string) []int {
-	subsys := c.EnabledSubsystems(cpath)
+func (c *Cgroups) pids(h string) []int {
+	subsys := c.AttachedSubsystems(h)
 
 	pids := []int{}
 
 	for _, s := range subsys {
-		path := fmt.Sprintf("%s/%s%s", c.FsPath, s, cpath)
+		path := fmt.Sprintf("%s/%s%s", c.FsPath, s, h)
 		err := filepath.Walk(path, func(p string, f os.FileInfo, err error) error {
 			if err != nil {
 				return err
@@ -198,8 +198,8 @@ func (c *Cgroups) pids(cpath string) []int {
 }
 
 // ReadSimple read file and return value as string
-func (c *Cgroups) ReadSimple(cpath string, sname string, stat string) (string, error) {
-	path := fmt.Sprintf("%s/%s%s/%s", c.FsPath, sname, cpath, stat)
+func (c *Cgroups) ReadSimple(h string, sname string, stat string) (string, error) {
+	path := fmt.Sprintf("%s/%s%s/%s", c.FsPath, sname, h, stat)
 	val, err := ioutil.ReadFile(path)
 	if err != nil {
 		return "", err
