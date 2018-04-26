@@ -30,7 +30,7 @@ func TestAttachedSubsystems(t *testing.T) {
 
 func TestIsAttacheddSubsystem(t *testing.T) {
 	c := Cgroups{FsPath: testFs()}
-	actual := c.IsAttachedSubsystem("/my-cgroup", "cpu,cpuacct")
+	actual := c.IsAttachedSubsystem("/my-cgroup", "cpuacct")
 	expected := true
 	if actual != expected {
 		t.Errorf("actual %v\nwant %v", actual, expected)
