@@ -24,16 +24,16 @@ $ cgrps ls | grep user.slice | head -1 |  cgrps ps
 
 list cgroups.
 
-### `cgrps ps [CGROUP]`
+### `cgrps ps [CGROUP...]`
 
 report a snapshot of the current cgroups processes.
 
 ### `cgrps stat [CGROUP]`
 
-show current cgroups stats (`CPU` `MEMORY` `BLKIO`).
+show current cgroup stats (`CPU` `MEMORY` `BLKIO`).
 
 ## !!!NOTICE!!!
 
-`cgrps` displays cgroups with the same hs together.
+`cgrps` displays cgroups with the same hierarchies together.
 
 If you want to check separately, please use `cgroup-tools (Ubuntu)` or `libcgroup-tools (CentOS)` etc.

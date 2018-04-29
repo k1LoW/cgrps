@@ -34,13 +34,13 @@ import (
 
 // psCmd represents the ps command
 var psCmd = &cobra.Command{
-	Use:   "ps [CGROUP]",
+	Use:   "ps [CGROUP...]",
 	Short: "report a snapshot of the current cgroups processes",
 	Long:  `report a snapshot of the current cgroups processes.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if terminal.IsTerminal(0) {
 			if len(args) < 1 {
-				return errors.New("requires [CGROUP] or STDIN")
+				return errors.New("requires [CGROUP...] or STDIN")
 			}
 		}
 		return nil
