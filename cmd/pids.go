@@ -53,7 +53,7 @@ var pidsCmd = &cobra.Command{
 			hs = args
 		} else {
 			b, _ := ioutil.ReadAll(os.Stdin)
-			hs = strings.Split(string(b), "\n")
+			hs = strings.Split(strings.TrimRight(string(b), "\n"), "\n")
 		}
 
 		c := cgroups.Cgroups{FsPath: "/sys/fs/cgroup"}
