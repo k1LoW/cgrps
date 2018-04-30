@@ -23,7 +23,6 @@ package cgroups
 import (
 	"bufio"
 	"fmt"
-	"github.com/k1LoW/go-ps"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -117,22 +116,6 @@ func (c *Cgroups) IsAttachedSubsystem(h string, sname string) bool {
 		return false
 	}
 	return true
-}
-
-// Processes return processe info in specific cgroup hierarchy
-func (c *Cgroups) Processes(hs []string) ([]ps.Process, error) {
-	pids := c.Pids(hs)
-	processes := []ps.Process{}
-
-	for _, pid := range pids {
-		pr, err := ps.FindProcess(pid)
-		if err != nil {
-			return processes, err
-		}
-		processes = append(processes, pr)
-	}
-
-	return processes, nil
 }
 
 // Pids return pids in specific cgroup hierarchy

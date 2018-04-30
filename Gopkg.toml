@@ -30,7 +30,3 @@
 [prune]
   go-tests = true
   unused-packages = true
-
-[[constraint]]
-  branch = "fix-scan-stat"
-  name = "github.com/k1LoW/go-ps"

@@ -42,19 +42,6 @@ func TestIsAttacheddSubsystem(t *testing.T) {
 	}
 }
 
-func TestProcesses(t *testing.T) {
-	c := Cgroups{FsPath: testFs()}
-	ps, err := c.Processes([]string{"/my-cgroup"})
-	if err != nil {
-		t.Error(err)
-	}
-	actual := len(ps)
-	expected := 3
-	if actual != expected {
-		t.Errorf("actual %v\nwant %v", actual, expected)
-	}
-}
-
 func TestReadSimple(t *testing.T) {
 	c := Cgroups{FsPath: testFs()}
 	actual, err := c.ReadSimple("/my-cgroup", "memory", "memory.usage_in_bytes")
