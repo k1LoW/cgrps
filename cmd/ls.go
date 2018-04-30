@@ -21,6 +21,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/k1LoW/cgrps/cgroups"
 	"github.com/spf13/cobra"
@@ -41,22 +42,22 @@ var lsCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		for _, c := range cs {
-			fmt.Println(c)
+		if OutputJSON {
+			jsonBytes, err := json.Marshal(cs)
+			if err != nil {
+				fmt.Println("JSON Marshal error:", err)
+				os.Exit(1)
+			}
+			fmt.Println(string(jsonBytes))
+		} else {
+			for _, c := range cs {
+				fmt.Println(c)
+			}
 		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(lsCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// lsCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// lsCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	lsCmd.Flags().BoolVarP(&OutputJSON, "json", "", false, "print result as JSON format")
 }

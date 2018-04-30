@@ -102,7 +102,7 @@ func printPsAsJSON(processes []ps.Process) {
 	jsonBytes, err := json.Marshal(list)
 	if err != nil {
 		fmt.Println("JSON Marshal error:", err)
-		return
+		os.Exit(1)
 	}
 
 	fmt.Println(string(jsonBytes))

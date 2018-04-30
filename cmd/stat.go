@@ -217,7 +217,7 @@ func printStatAsJSON(h string) {
 	jsonBytes, err := json.Marshal(stat)
 	if err != nil {
 		fmt.Println("JSON Marshal error:", err)
-		return
+		os.Exit(1)
 	}
 
 	fmt.Println(string(jsonBytes))
