@@ -29,8 +29,8 @@ import (
 // versionCmd represents the version command
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "Version prints the cgrps version.",
-	Long:  `Version prints the cgrps version.`,
+	Short: "print cgrps version",
+	Long:  `print cgrps version.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println(version.Version)
 	},
