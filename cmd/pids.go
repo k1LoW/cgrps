@@ -21,24 +21,23 @@
 package cmd
 
 import (
+	"fmt"
+
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/k1LoW/cgrps/cgroups"
-	"github.com/k1LoW/go-ps"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh/terminal"
 	"io/ioutil"
 	"os"
-	"path/filepath"
 	"strings"
 )
 
-// psCmd represents the ps command
-var psCmd = &cobra.Command{
-	Use:   "ps [CGROUP...]",
-	Short: "report a snapshot of the current cgroups processes",
-	Long:  `report a snapshot of the current cgroups processes.`,
+// pidsCmd represents the pids command
+var pidsCmd = &cobra.Command{
+	Use:   "pids [CGROUP...]",
+	Short: "report a snapshot of the current cgroups pids",
+	Long:  `report a snapshot of the current cgroups pids.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if terminal.IsTerminal(0) {
 			if len(args) < 1 {
@@ -58,57 +57,24 @@ var psCmd = &cobra.Command{
 		}
 
 		c := cgroups.Cgroups{FsPath: "/sys/fs/cgroup"}
-		processes, err := c.Processes(hs)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		pids := c.Pids(hs)
 
 		if OutputJSON {
-			printPsAsJSON(processes)
+			jsonBytes, err := json.Marshal(pids)
+			if err != nil {
+				fmt.Println("JSON Marshal error:", err)
+				os.Exit(1)
+			}
+			fmt.Println(string(jsonBytes))
 		} else {
-			printPs(processes)
+			for _, pid := range pids {
+				fmt.Println(pid)
+			}
 		}
 	},
 }
 
-func printPs(processes []ps.Process) {
-	fmt.Println(fmt.Sprintf("%5s", "PID"), fmt.Sprintf("%5s", "PPID"), fmt.Sprintf("%15s", "CMD"), "PATH")
-	for _, pr := range processes {
-		path, err := filepath.EvalSymlinks(fmt.Sprintf("/proc/%d/exe", pr.Pid()))
-		if err != nil {
-			path = "-"
-		}
-		fmt.Println(fmt.Sprintf("%5d", pr.Pid()), fmt.Sprintf("%5d", pr.PPid()), fmt.Sprintf("%15s", pr.Executable()), path)
-	}
-}
-
-type psJSON struct {
-	PID  int    `json:"pid"`
-	PPID int    `json:"ppid"`
-	CMD  string `json:"cmd"`
-	PATH string `json:"path"`
-}
-
-func printPsAsJSON(processes []ps.Process) {
-	list := make([]psJSON, 0, len(processes))
-	for _, pr := range processes {
-		path, err := filepath.EvalSymlinks(fmt.Sprintf("/proc/%d/exe", pr.Pid()))
-		if err != nil {
-			path = "-"
-		}
-		list = append(list, psJSON{PID: pr.Pid(), PPID: pr.PPid(), CMD: pr.Executable(), PATH: path})
-	}
-	jsonBytes, err := json.Marshal(list)
-	if err != nil {
-		fmt.Println("JSON Marshal error:", err)
-		os.Exit(1)
-	}
-
-	fmt.Println(string(jsonBytes))
-}
-
 func init() {
-	rootCmd.AddCommand(psCmd)
-	psCmd.Flags().BoolVarP(&OutputJSON, "json", "", false, "print result as JSON format")
+	rootCmd.AddCommand(pidsCmd)
+	pidsCmd.Flags().BoolVarP(&OutputJSON, "json", "", false, "print result as JSON format")
 }
