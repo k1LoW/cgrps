@@ -20,12 +20,6 @@
   version = "v1.0"
 
 [[projects]]
-  branch = "fix-scan-stat"
-  name = "github.com/k1LoW/go-ps"
-  packages = ["."]
-  revision = "3b20a0f983dbf5c60ed2e0192cad07f87081ef27"
-
-[[projects]]
   name = "github.com/maruel/panicparse"
   packages = ["stack"]
   revision = "785840568bdc7faa0dfb1cd6c643207f03271f64"
@@ -79,6 +73,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "15bf3b64a51de82d5bbd8553b11679b0f344499624f624f8cd250b0b6c98d872"
+  inputs-digest = "450db4e357996b59fb0f42c608c46f8b30c86a42510808c876f70205b49e06cf"
   solver-name = "gps-cdcl"
   solver-version = 1

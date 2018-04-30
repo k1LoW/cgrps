@@ -9,13 +9,19 @@
 `cgrps` is supposed to be used with [peco](https://github.com/peco/peco) like following command,
 
 ```sh
-$ cgrps ps $(cgrps ls | peco)
+$ cgrps stat $(cgrps ls | peco)
 ```
 
 or
 
 ```sh
-$ cgrps ls | grep user.slice | head -1 |  cgrps ps
+$ cgrps ls | grep user.slice | head -1 |  cgrps stat
+```
+
+### Use with `ps`
+
+```sh
+$ ps --user --pid $(cgrps ls | peco | cgrps pids | xargs)
 ```
 
 ## Commands
@@ -23,10 +29,6 @@ $ cgrps ls | grep user.slice | head -1 |  cgrps ps
 ### `cgrps ls`
 
 list cgroups.
-
-### `cgrps ps [CGROUP...]`
-
-report a snapshot of the current cgroups processes.
 
 ### `cgrps pids [CGROUP...]`
 
