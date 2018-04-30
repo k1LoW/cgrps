@@ -33,6 +33,10 @@ crossbuild: deps depsdev
 	goxz -pv=$(ver) -os=linux -arch=386,amd64 -build-ldflags="$(RELEASE_BUILD_LDFLAGS)" \
 	  -d=./dist/$(ver)
 
+prerelease:
+	$(eval ver = v$(shell gobump show -r version/))
+	ghch -w -N ${ver}
+
 release: crossbuild
 	$(eval ver = v$(shell gobump show -r version/))
 	ghr -username k1LoW -replace ${ver} dist/${ver}
