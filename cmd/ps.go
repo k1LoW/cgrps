@@ -21,9 +21,11 @@
 package cmd
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/k1LoW/cgrps/cgroups"
+	"github.com/k1LoW/go-ps"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh/terminal"
 	"io/ioutil"
@@ -62,27 +64,51 @@ var psCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		fmt.Println(fmt.Sprintf("%5s", "PID"), fmt.Sprintf("%5s", "PPID"), fmt.Sprintf("%15s", "CMD"), "PATH")
-		for _, pr := range processes {
-			path, err := filepath.EvalSymlinks(fmt.Sprintf("/proc/%d/exe", pr.Pid()))
-			if err != nil {
-				path = "-"
-			}
-			fmt.Println(fmt.Sprintf("%5d", pr.Pid()), fmt.Sprintf("%5d", pr.PPid()), fmt.Sprintf("%15s", pr.Executable()), path)
+		if OutputJSON {
+			printPsAsJSON(processes)
+		} else {
+			printPs(processes)
 		}
 	},
 }
 
+func printPs(processes []ps.Process) {
+	fmt.Println(fmt.Sprintf("%5s", "PID"), fmt.Sprintf("%5s", "PPID"), fmt.Sprintf("%15s", "CMD"), "PATH")
+	for _, pr := range processes {
+		path, err := filepath.EvalSymlinks(fmt.Sprintf("/proc/%d/exe", pr.Pid()))
+		if err != nil {
+			path = "-"
+		}
+		fmt.Println(fmt.Sprintf("%5d", pr.Pid()), fmt.Sprintf("%5d", pr.PPid()), fmt.Sprintf("%15s", pr.Executable()), path)
+	}
+}
+
+type psJSON struct {
+	PID  int    `json:"pid"`
+	PPID int    `json:"ppid"`
+	CMD  string `json:"cmd"`
+	PATH string `json:"path"`
+}
+
+func printPsAsJSON(processes []ps.Process) {
+	list := make([]psJSON, 0, len(processes))
+	for _, pr := range processes {
+		path, err := filepath.EvalSymlinks(fmt.Sprintf("/proc/%d/exe", pr.Pid()))
+		if err != nil {
+			path = "-"
+		}
+		list = append(list, psJSON{PID: pr.Pid(), PPID: pr.PPid(), CMD: pr.Executable(), PATH: path})
+	}
+	jsonBytes, err := json.Marshal(list)
+	if err != nil {
+		fmt.Println("JSON Marshal error:", err)
+		os.Exit(1)
+	}
+
+	fmt.Println(string(jsonBytes))
+}
+
 func init() {
 	rootCmd.AddCommand(psCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// psCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// psCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	psCmd.Flags().BoolVarP(&OutputJSON, "json", "", false, "print result as JSON format")
 }
