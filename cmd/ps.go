@@ -34,8 +34,6 @@ import (
 	"strings"
 )
 
-var OutputJSON bool
-
 // psCmd represents the ps command
 var psCmd = &cobra.Command{
 	Use:   "ps [CGROUP...]",

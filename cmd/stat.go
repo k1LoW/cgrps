@@ -21,8 +21,11 @@
 package cmd
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/gizak/termui"
+	"github.com/k1LoW/cgrps/cgroups"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh/terminal"
 	"io/ioutil"
@@ -54,121 +57,173 @@ var statCmd = &cobra.Command{
 			h = strings.TrimRight(string(b), "\n")
 		}
 
-		err := termui.Init()
-		if err != nil {
-			panic(err)
+		if OutputJSON {
+			printStatAsJSON(h)
+		} else {
+			printStat(h)
 		}
-		defer termui.Close()
+	},
+}
 
-		title := termui.NewPar("stat")
-		title.Height = 1
-		title.Border = false
-		cgroupLabel, cgroupData := NewCgroupStat(h)
+// printStat ...
+func printStat(h string) {
+	err := termui.Init()
+	if err != nil {
+		panic(err)
+	}
+	defer termui.Close()
 
+	title := termui.NewPar("stat")
+	title.Height = 1
+	title.Border = false
+	cgroupLabel, cgroupData := NewCgroupStat(h)
+
+	termui.Body.AddRows(
+		termui.NewRow(
+			termui.NewCol(2, 0, title),
+		),
+		termui.NewRow(
+			termui.NewCol(2, 0, cgroupLabel),
+			termui.NewCol(10, 0, cgroupData),
+		),
+	)
+
+	cpuTitle, cpuLabel, cpuData, cpuDataTotal := NewCPUStat()
+	memoryTitle, memoryLabel, memoryData := NewMemoryStat()
+	blkioTitle, blkioLabel, blkioData := NewBlkioStat()
+
+	titleLists := []*termui.Par{}
+	labelLists := []*termui.List{}
+	dataLists := []*termui.List{}
+
+	if IsEnabledCPUStat(h) {
+		titleLists = append(titleLists, cpuTitle)
+		labelLists = append(labelLists, cpuLabel)
+		dataLists = append(dataLists, cpuData)
+	}
+	if IsEnabledMemoryStat(h) {
+		titleLists = append(titleLists, memoryTitle)
+		labelLists = append(labelLists, memoryLabel)
+		dataLists = append(dataLists, memoryData)
+	}
+	if IsEnabledBlkioStat(h) {
+		titleLists = append(titleLists, blkioTitle)
+		labelLists = append(labelLists, blkioLabel)
+		dataLists = append(dataLists, blkioData)
+	}
+
+	row := int(math.Ceil(float64(len(titleLists)) / 3))
+	for i := 0; i < row; i++ {
+		t := []*termui.Row{}
+		d := []*termui.Row{}
+
+		if len(titleLists) > i {
+			t = append(t, termui.NewCol(2, 0, titleLists[i]))
+			d = append(d, termui.NewCol(2, 0, labelLists[i]))
+			d = append(d, termui.NewCol(2, 0, dataLists[i]))
+		}
+		if len(titleLists) > i+1 {
+			t = append(t, termui.NewCol(2, 2, titleLists[i+1]))
+			d = append(d, termui.NewCol(2, 0, labelLists[i+1]))
+			d = append(d, termui.NewCol(2, 0, dataLists[i+1]))
+		}
+		if len(titleLists) > i+2 {
+			t = append(t, termui.NewCol(2, 2, titleLists[i+2]))
+			d = append(d, termui.NewCol(2, 0, labelLists[i+2]))
+			d = append(d, termui.NewCol(2, 0, dataLists[i+2]))
+		}
 		termui.Body.AddRows(
-			termui.NewRow(
-				termui.NewCol(2, 0, title),
-			),
-			termui.NewRow(
-				termui.NewCol(2, 0, cgroupLabel),
-				termui.NewCol(10, 0, cgroupData),
-			),
+			termui.NewRow(t...),
 		)
+		termui.Body.AddRows(
+			termui.NewRow(d...),
+		)
+	}
 
-		cpuTitle, cpuLabel, cpuData, cpuDataTotal := NewCPUStat()
-		memoryTitle, memoryLabel, memoryData := NewMemoryStat()
-		blkioTitle, blkioLabel, blkioData := NewBlkioStat()
+	termui.Body.Align()
 
-		titleLists := []*termui.Par{}
-		labelLists := []*termui.List{}
-		dataLists := []*termui.List{}
+	termui.Render(termui.Body)
 
-		if IsEnabledCPUStat(h) {
-			titleLists = append(titleLists, cpuTitle)
-			labelLists = append(labelLists, cpuLabel)
-			dataLists = append(dataLists, cpuData)
-		}
-		if IsEnabledMemoryStat(h) {
-			titleLists = append(titleLists, memoryTitle)
-			labelLists = append(labelLists, memoryLabel)
-			dataLists = append(dataLists, memoryData)
-		}
-		if IsEnabledBlkioStat(h) {
-			titleLists = append(titleLists, blkioTitle)
-			labelLists = append(labelLists, blkioLabel)
-			dataLists = append(dataLists, blkioData)
-		}
+	termui.Handle("/sys/kbd/<escape>", func(termui.Event) {
+		termui.StopLoop()
+	})
+	termui.Handle("/sys/kbd/q", func(termui.Event) {
+		termui.StopLoop()
+	})
 
-		row := int(math.Ceil(float64(len(titleLists)) / 3))
-		for i := 0; i < row; i++ {
-			t := []*termui.Row{}
-			d := []*termui.Row{}
-
-			if len(titleLists) > i {
-				t = append(t, termui.NewCol(2, 0, titleLists[i]))
-				d = append(d, termui.NewCol(2, 0, labelLists[i]))
-				d = append(d, termui.NewCol(2, 0, dataLists[i]))
-			}
-			if len(titleLists) > i+1 {
-				t = append(t, termui.NewCol(2, 2, titleLists[i+1]))
-				d = append(d, termui.NewCol(2, 0, labelLists[i+1]))
-				d = append(d, termui.NewCol(2, 0, dataLists[i+1]))
-			}
-			if len(titleLists) > i+2 {
-				t = append(t, termui.NewCol(2, 2, titleLists[i+2]))
-				d = append(d, termui.NewCol(2, 0, labelLists[i+2]))
-				d = append(d, termui.NewCol(2, 0, dataLists[i+2]))
-			}
-			termui.Body.AddRows(
-				termui.NewRow(t...),
-			)
-			termui.Body.AddRows(
-				termui.NewRow(d...),
-			)
-		}
-
-		termui.Body.Align()
+	termui.Handle("/timer/1s", func(e termui.Event) {
+		DrawCgroupStat(h, cgroupLabel, cgroupData)
+		DrawCPUStat(h, cpuLabel, cpuData, cpuDataTotal)
+		DrawMemoryStat(h, memoryLabel, memoryData)
+		DrawBlkioStat(h, blkioLabel, blkioData)
 
 		termui.Render(termui.Body)
+	})
 
-		termui.Handle("/sys/kbd/<escape>", func(termui.Event) {
-			termui.StopLoop()
-		})
-		termui.Handle("/sys/kbd/q", func(termui.Event) {
-			termui.StopLoop()
-		})
+	termui.Handle("/sys/wnd/resize", func(e termui.Event) {
+		termui.Body.Width = termui.TermWidth()
+		termui.Body.Align()
+		termui.Clear()
+		termui.Render(termui.Body)
+	})
 
-		termui.Handle("/timer/1s", func(e termui.Event) {
-			DrawCgroupStat(h, cgroupLabel, cgroupData)
-			DrawCPUStat(h, cpuLabel, cpuData, cpuDataTotal)
-			DrawMemoryStat(h, memoryLabel, memoryData)
-			DrawBlkioStat(h, blkioLabel, blkioData)
+	termui.Loop()
+}
 
-			termui.Render(termui.Body)
-		})
+func printStatAsJSON(h string) {
+	c := cgroups.Cgroups{FsPath: "/sys/fs/cgroup"}
+	stat := map[string]interface{}{}
+	if c.IsAttachedSubsystem(h, "cpu") {
+		cpu := map[string]interface{}{}
+		cpuLabel, cpuValue := c.CPU(h)
+		for k, l := range cpuLabel {
+			cpu[l] = cpuValue[k]
+		}
+		stat["cpu"] = cpu
+	}
+	if c.IsAttachedSubsystem(h, "cpuacct") {
+		cpuacct := map[string]interface{}{}
+		cpuAcctLabel, cpuAcctValue := c.CPUAcct(h)
+		for k, l := range cpuAcctLabel {
+			cpuacct[l] = cpuAcctValue[k]
+		}
+		stat["cpuacct"] = cpuacct
+	}
+	if c.IsAttachedSubsystem(h, "cpuset") {
+		cpuset := map[string]interface{}{}
+		cpuSetLabel, cpuSetValue := c.CPUSet(h)
+		for k, l := range cpuSetLabel {
+			cpuset[l] = cpuSetValue[k]
+		}
+		stat["cpuset"] = cpuset
+	}
+	if c.IsAttachedSubsystem(h, "memory") {
+		memory := map[string]interface{}{}
+		memoryLabel, memoryValue := c.Memory(h)
+		for k, l := range memoryLabel {
+			memory[l] = memoryValue[k]
+		}
+		stat["memory"] = memory
+	}
+	if c.IsAttachedSubsystem(h, "blkio") {
+		blkio := map[string]interface{}{}
+		blkioLabel, blkioValue := c.Blkio(h)
+		for k, l := range blkioLabel {
+			blkio[l] = blkioValue[k]
+		}
+		stat["blkio"] = blkio
+	}
 
-		termui.Handle("/sys/wnd/resize", func(e termui.Event) {
-			termui.Body.Width = termui.TermWidth()
-			termui.Body.Align()
-			termui.Clear()
-			termui.Render(termui.Body)
-		})
+	jsonBytes, err := json.Marshal(stat)
+	if err != nil {
+		fmt.Println("JSON Marshal error:", err)
+		return
+	}
 
-		termui.Loop()
-
-	},
+	fmt.Println(string(jsonBytes))
 }
 
 func init() {
 	rootCmd.AddCommand(statCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// statCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// statCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	statCmd.Flags().BoolVarP(&OutputJSON, "json", "", false, "print result as JSON format")
 }
