@@ -115,7 +115,6 @@ func DrawCPUStat(h string, label *termui.List, data *termui.List, total *CPUStat
 		l := fmt.Sprintf("%s:", cpuAcctLabel[k])
 		label.Items = append(label.Items, l)
 		current, err := strconv.ParseUint(v, 10, 64)
-		total.Items[l] = current
 		if err != nil {
 			panic(err)
 		}
@@ -128,6 +127,7 @@ func DrawCPUStat(h string, label *termui.List, data *termui.List, total *CPUStat
 		} else {
 			d = append(d, "-       ")
 		}
+		total.Items[l] = current
 	}
 
 	// cpuset
