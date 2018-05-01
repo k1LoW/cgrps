@@ -44,7 +44,7 @@ func IsEnabledCPUStat(h string) bool {
 }
 
 // NewCPUStat create new CPU stat vals
-func NewCPUStat() (*termui.Par, *termui.List, *termui.List, *CPUStat) {
+func NewCPUStat(h string) (*termui.Par, *termui.List, *termui.List, *CPUStat) {
 	title := termui.NewPar("CPU/CPUSet/CPUAcct")
 	title.Height = 1
 	title.Border = false
@@ -62,6 +62,8 @@ func NewCPUStat() (*termui.Par, *termui.List, *termui.List, *CPUStat) {
 
 	total := CPUStat{}
 	total.Items = make(map[string]uint64)
+
+	DrawCPUStat(h, label, data, &total)
 
 	return title, label, data, &total
 }

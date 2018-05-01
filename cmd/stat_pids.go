@@ -26,34 +26,66 @@ import (
 	"github.com/k1LoW/cgrps/cgroups"
 )
 
-// NewCgroupStat create new Cgroup stat vals
-func NewCgroupStat(h string) (*termui.List, *termui.List) {
+// IsEnabledPidsStat return Memory stat enabled or not
+func IsEnabledPidsStat(h string) bool {
+	c := cgroups.Cgroups{FsPath: "/sys/fs/cgroup"}
+	if c.IsAttachedSubsystem(h, "pids") {
+		return true
+	}
+	return false
+}
+
+// NewPidsStat create new Pids stat vals
+func NewPidsStat(h string) (*termui.Par, *termui.List, *termui.List) {
+	title := termui.NewPar("PIDS")
+	title.Height = 1
+	title.Border = false
+
 	label := termui.NewList()
 	label.Border = false
-	label.ItemFgColor = termui.ColorGreen
-	label.Items = []string{
-		"  cgroup hierarchy:",
-		"  cgroup.procs:",
-		"  subsystems:",
-	}
-	label.Height = 4
+	label.ItemFgColor = termui.ColorCyan
+	label.Items = []string{}
+	label.Height = len(label.Items)
 
 	data := termui.NewList()
 	data.Border = false
-	data.Items = []string{
-		h, "-", "-",
-	}
-	data.Height = 4
+	data.Items = []string{}
+	data.Height = len(label.Items)
 
-	return label, data
+	DrawPidsStat(h, label, data)
+
+	return title, label, data
 }
 
-// DrawCgroupStat gather cgroup stat vals and set
-func DrawCgroupStat(h string, label *termui.List, data *termui.List) {
+// DrawPidsStat gather Pids stat vals and set
+func DrawPidsStat(h string, label *termui.List, data *termui.List) {
 	c := cgroups.Cgroups{FsPath: "/sys/fs/cgroup"}
-	pids := c.ListPids([]string{h})
-	// cgroup.procs
-	data.Items[1] = fmt.Sprintf("%d", len(pids))
-	// subsystems
-	data.Items[2] = fmt.Sprintf("%v", c.AttachedSubsystems(h))
+	if !IsEnabledPidsStat(h) {
+		return
+	}
+
+	d := []string{}
+
+	// pids
+	pidsLabel, pidsValue := c.Pids(h)
+	for k, v := range pidsValue {
+		l := fmt.Sprintf("%s:", pidsLabel[k])
+		label.Items = append(label.Items, l)
+		d = append(d, fmt.Sprintf("%v", v))
+	}
+
+	maxlen := 1
+	for _, v := range d {
+		if maxlen < len(v) {
+			maxlen = len(v)
+		}
+	}
+
+	data.Items = nil
+	for _, v := range d {
+		data.Items = append(data.Items, fmt.Sprintf(fmt.Sprintf("%%%ds", maxlen), v))
+	}
+
+	label.Height = len(data.Items)
+	data.Height = len(data.Items)
 }

@@ -18,42 +18,30 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package cmd
+package cgroups
 
 import (
-	"fmt"
-	"github.com/gizak/termui"
-	"github.com/k1LoW/cgrps/cgroups"
+	"strings"
 )
 
-// NewCgroupStat create new Cgroup stat vals
-func NewCgroupStat(h string) (*termui.List, *termui.List) {
-	label := termui.NewList()
-	label.Border = false
-	label.ItemFgColor = termui.ColorGreen
-	label.Items = []string{
-		"  cgroup hierarchy:",
-		"  cgroup.procs:",
-		"  subsystems:",
+// Pids return cgroups pids values
+func (c *Cgroups) Pids(h string) ([]string, []string) {
+	label := []string{}
+	value := []string{}
+
+	// params stat
+	var params = []string{
+		"pids.max",
+		"pids.current",
 	}
-	label.Height = 4
-
-	data := termui.NewList()
-	data.Border = false
-	data.Items = []string{
-		h, "-", "-",
+	for _, p := range params {
+		splited := strings.SplitN(p, ".", 2)
+		v, err := c.ReadSimple(h, splited[0], p)
+		if v != "" && err == nil {
+			label = append(label, p)
+			value = append(value, v)
+		}
 	}
-	data.Height = 4
 
-	return label, data
-}
-
-// DrawCgroupStat gather cgroup stat vals and set
-func DrawCgroupStat(h string, label *termui.List, data *termui.List) {
-	c := cgroups.Cgroups{FsPath: "/sys/fs/cgroup"}
-	pids := c.ListPids([]string{h})
-	// cgroup.procs
-	data.Items[1] = fmt.Sprintf("%d", len(pids))
-	// subsystems
-	data.Items[2] = fmt.Sprintf("%v", c.AttachedSubsystems(h))
+	return label, value
 }
