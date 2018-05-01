@@ -21,7 +21,7 @@ $ cgrps ls | grep user.slice | head -1 |  cgrps stat
 ### Use with `ps`
 
 ```sh
-$ ps --user --pid $(cgrps ls | peco | cgrps pids | xargs)
+$ ps u --pid $(cgrps ls | peco | cgrps pids | xargs)
 ```
 
 ## Commands
