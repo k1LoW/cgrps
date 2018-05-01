@@ -57,7 +57,7 @@ var pidsCmd = &cobra.Command{
 		}
 
 		c := cgroups.Cgroups{FsPath: "/sys/fs/cgroup"}
-		pids := c.Pids(hs)
+		pids := c.ListPids(hs)
 
 		if OutputJSON {
 			jsonBytes, err := json.Marshal(pids)

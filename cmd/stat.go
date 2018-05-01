@@ -88,9 +88,10 @@ func printStat(h string) {
 		),
 	)
 
-	cpuTitle, cpuLabel, cpuData, cpuDataTotal := NewCPUStat()
-	memoryTitle, memoryLabel, memoryData := NewMemoryStat()
-	blkioTitle, blkioLabel, blkioData := NewBlkioStat()
+	cpuTitle, cpuLabel, cpuData, cpuDataTotal := NewCPUStat(h)
+	memoryTitle, memoryLabel, memoryData := NewMemoryStat(h)
+	blkioTitle, blkioLabel, blkioData := NewBlkioStat(h)
+	pidsTitle, pidsLabel, pidsData := NewPidsStat(h)
 
 	titleLists := []*termui.Par{}
 	labelLists := []*termui.List{}
@@ -111,26 +112,33 @@ func printStat(h string) {
 		labelLists = append(labelLists, blkioLabel)
 		dataLists = append(dataLists, blkioData)
 	}
+	if IsEnabledPidsStat(h) {
+		titleLists = append(titleLists, pidsTitle)
+		labelLists = append(labelLists, pidsLabel)
+		dataLists = append(dataLists, pidsData)
+	}
 
 	row := int(math.Ceil(float64(len(titleLists)) / 3))
 	for i := 0; i < row; i++ {
 		t := []*termui.Row{}
 		d := []*termui.Row{}
 
-		if len(titleLists) > i {
-			t = append(t, termui.NewCol(2, 0, titleLists[i]))
-			d = append(d, termui.NewCol(2, 0, labelLists[i]))
-			d = append(d, termui.NewCol(2, 0, dataLists[i]))
+		index := i * 3
+
+		if len(titleLists) > index {
+			t = append(t, termui.NewCol(2, 0, titleLists[index]))
+			d = append(d, termui.NewCol(2, 0, labelLists[index]))
+			d = append(d, termui.NewCol(2, 0, dataLists[index]))
 		}
-		if len(titleLists) > i+1 {
-			t = append(t, termui.NewCol(2, 2, titleLists[i+1]))
-			d = append(d, termui.NewCol(2, 0, labelLists[i+1]))
-			d = append(d, termui.NewCol(2, 0, dataLists[i+1]))
+		if len(titleLists) > index+1 {
+			t = append(t, termui.NewCol(2, 2, titleLists[index+1]))
+			d = append(d, termui.NewCol(2, 0, labelLists[index+1]))
+			d = append(d, termui.NewCol(2, 0, dataLists[index+1]))
 		}
-		if len(titleLists) > i+2 {
-			t = append(t, termui.NewCol(2, 2, titleLists[i+2]))
-			d = append(d, termui.NewCol(2, 0, labelLists[i+2]))
-			d = append(d, termui.NewCol(2, 0, dataLists[i+2]))
+		if len(titleLists) > index+2 {
+			t = append(t, termui.NewCol(2, 2, titleLists[index+2]))
+			d = append(d, termui.NewCol(2, 0, labelLists[index+2]))
+			d = append(d, termui.NewCol(2, 0, dataLists[index+2]))
 		}
 		termui.Body.AddRows(
 			termui.NewRow(t...),
@@ -156,6 +164,7 @@ func printStat(h string) {
 		DrawCPUStat(h, cpuLabel, cpuData, cpuDataTotal)
 		DrawMemoryStat(h, memoryLabel, memoryData)
 		DrawBlkioStat(h, blkioLabel, blkioData)
+		DrawPidsStat(h, pidsLabel, pidsData)
 
 		termui.Render(termui.Body)
 	})
@@ -212,6 +221,14 @@ func printStatAsJSON(h string) {
 			blkio[l] = blkioValue[k]
 		}
 		stat["blkio"] = blkio
+	}
+	if c.IsAttachedSubsystem(h, "pids") {
+		pids := map[string]interface{}{}
+		pidsLabel, pidsValue := c.Pids(h)
+		for k, l := range pidsLabel {
+			pids[l] = pidsValue[k]
+		}
+		stat["pids"] = pids
 	}
 
 	jsonBytes, err := json.Marshal(stat)

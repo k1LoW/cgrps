@@ -36,7 +36,7 @@ func IsEnabledBlkioStat(h string) bool {
 }
 
 // NewBlkioStat create new Blkio stat vals
-func NewBlkioStat() (*termui.Par, *termui.List, *termui.List) {
+func NewBlkioStat(h string) (*termui.Par, *termui.List, *termui.List) {
 	title := termui.NewPar("BLKIO")
 	title.Height = 1
 	title.Border = false
@@ -51,6 +51,8 @@ func NewBlkioStat() (*termui.Par, *termui.List, *termui.List) {
 	data.Border = false
 	data.Items = []string{}
 	data.Height = len(label.Items)
+
+	DrawBlkioStat(h, label, data)
 
 	return title, label, data
 }

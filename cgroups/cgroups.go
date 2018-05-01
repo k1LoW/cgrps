@@ -118,12 +118,12 @@ func (c *Cgroups) IsAttachedSubsystem(h string, sname string) bool {
 	return true
 }
 
-// Pids return pids in specific cgroup hierarchy
-func (c *Cgroups) Pids(hs []string) []int {
+// ListPids return pids in specific cgroup hierarchy
+func (c *Cgroups) ListPids(hs []string) []int {
 	all := []int{}
 	encountered := make(map[int]bool)
 	for _, h := range hs {
-		all = append(all, c.pids(h)...)
+		all = append(all, c.listPids(h)...)
 	}
 
 	merged := []int{}
@@ -139,7 +139,7 @@ func (c *Cgroups) Pids(hs []string) []int {
 	return merged
 }
 
-func (c *Cgroups) pids(h string) []int {
+func (c *Cgroups) listPids(h string) []int {
 	subsys := c.AttachedSubsystems(h)
 
 	pids := []int{}
