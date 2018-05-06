@@ -24,6 +24,18 @@ $ cgrps ls | grep user.slice | head -1 |  cgrps stat
 $ ps u --pid $(cgrps ls | peco | cgrps pids | xargs)
 ```
 
+### Use with `pidstat`
+
+```sh
+$ pidstat -dru -h -p $(cgrps ls | peco | cgrps pids | xargs | tr ' ' ',')
+```
+
+### Use with `lsof`
+
+```sh
+$ lsof -Pn -i -a -p $(cgrps ls | peco | cgrps pids | xargs | tr ' ' ',')
+```
+
 ## Commands
 
 ### `cgrps ls`
