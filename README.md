@@ -48,7 +48,7 @@ report a snapshot of the current cgroups pids.
 
 ### `cgrps stat [CGROUP]`
 
-show current cgroup stats (`CPU` `MEMORY` `BLKIO`).
+show current cgroup stats (`CPU` `MEMORY` `BLKIO` `PIDS`).
 
 ## !!!NOTICE!!!
 
