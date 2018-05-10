@@ -1,4 +1,4 @@
-# cgrps [![Build Status](https://travis-ci.org/k1LoW/cgrps.svg?branch=master)](https://travis-ci.org/k1LoW/cgrps)
+# cgrps [![Build Status](https://travis-ci.org/k1LoW/cgrps.svg?branch=master)](https://travis-ci.org/k1LoW/cgrps) [![Coverage Status](https://coveralls.io/repos/github/k1LoW/cgrps/badge.svg?branch=master)](https://coveralls.io/github/k1LoW/cgrps?branch=master)
 
 `cgrps` is a set of commands for checking cgroups.
 
@@ -49,6 +49,10 @@ report a snapshot of the current cgroups pids.
 ### `cgrps stat [CGROUP]`
 
 show current cgroup stats (`CPU` `MEMORY` `BLKIO` `PIDS`).
+
+### `cgrps identify [PID...]`
+
+report cgroups for processes.
 
 ## !!!NOTICE!!!
 

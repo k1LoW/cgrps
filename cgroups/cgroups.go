@@ -193,8 +193,5 @@ func (c *Cgroups) ReadSimple(h string, sname string, stat string) (string, error
 		return "", err
 	}
 	str := strings.TrimRight(string(val), "\n")
-	if str == "" {
-		str = ""
-	}
 	return str, nil
 }
