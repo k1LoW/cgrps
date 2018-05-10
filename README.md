@@ -50,6 +50,10 @@ report a snapshot of the current cgroups pids.
 
 show current cgroup stats (`CPU` `MEMORY` `BLKIO` `PIDS`).
 
+### `cgrps identify [PID...]`
+
+report cgroups for processes.
+
 ## !!!NOTICE!!!
 
 `cgrps` displays cgroups with the same hierarchies together.
