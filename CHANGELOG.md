@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.7.0](https://github.com/k1LoW/cgrps/compare/v0.6.0...v0.7.0) (2018-05-10)
+
+* Sort result for `cgrps ls` [#8](https://github.com/k1LoW/cgrps/pull/8) ([k1LoW](https://github.com/k1LoW))
+* Add `cgrps identify [PID...]` [#7](https://github.com/k1LoW/cgrps/pull/7) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.6.0](https://github.com/k1LoW/cgrps/compare/v0.5.0...v0.6.0) (2018-05-06)
 
 * `cgrps stat` support pids subsystem [#6](https://github.com/k1LoW/cgrps/pull/6) ([k1LoW](https://github.com/k1LoW))
