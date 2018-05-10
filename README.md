@@ -1,4 +1,4 @@
-# cgrps [![Build Status](https://travis-ci.org/k1LoW/cgrps.svg?branch=master)](https://travis-ci.org/k1LoW/cgrps) [![Coverage Status](https://coveralls.io/repos/github/k1LoW/cgrps/badge.svg?branch=master)](https://coveralls.io/github/k1LoW/cgrps?branch=master)
+# cgrps [![Build Status](https://travis-ci.org/k1LoW/cgrps.svg?branch=master)](https://travis-ci.org/k1LoW/cgrps) [![GitHub release](https://img.shields.io/github/release/k1LoW/cgrps.svg)](https://github.com/k1LoW/cgrps/releases) [![Coverage Status](https://coveralls.io/repos/github/k1LoW/cgrps/badge.svg?branch=master)](https://coveralls.io/github/k1LoW/cgrps?branch=master)
 
 `cgrps` is a set of commands for checking cgroups.
 
