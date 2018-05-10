@@ -1,0 +1,11 @@
+11:net_cls,net_prio:/
+10:memory:/my-cgroup
+9:freezer:/user/root/0
+8:pids:/user.slice/user-1000.slice
+7:blkio:/my-cgroup
+6:hugetlb:/
+5:devices:/user.slice
+4:cpu,cpuacct:/my-cgroup
+3:perf_event:/
+2:cpuset:/
+1:name=systemd:/user/root/0
