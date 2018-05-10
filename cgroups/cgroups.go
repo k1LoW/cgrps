@@ -93,6 +93,8 @@ func (c *Cgroups) List() ([]string, error) {
 		}
 	}
 
+	sort.Strings(cs)
+
 	return cs, nil
 }
 
