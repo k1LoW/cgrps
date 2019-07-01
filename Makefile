@@ -1,6 +1,16 @@
 PKG = github.com/k1LoW/cgrps
 COMMIT = $$(git describe --tags --always)
-DATE = $$(date --utc '+%Y-%m-%d_%H:%M:%S')
+OSNAME=${shell uname -s}
+ifeq ($(OSNAME),Darwin)
+	SED = gsed
+	DATE = $$(gdate --utc '+%Y-%m-%d_%H:%M:%S')
+else
+	SED = sed
+	DATE = $$(date --utc '+%Y-%m-%d_%H:%M:%S')
+endif
+
+export GO111MODULE=on
+
 BUILD_LDFLAGS = -X $(PKG).commit=$(COMMIT) -X $(PKG).date=$(DATE)
 RELEASE_BUILD_LDFLAGS = -s -w $(BUILD_LDFLAGS)
 
@@ -15,10 +25,6 @@ cover: depsdev
 build:
 	go build -ldflags="$(BUILD_LDFLAGS)"
 
-deps:
-	go get -u github.com/golang/dep/cmd/dep
-	dep ensure
-
 depsdev:
 	go get golang.org/x/tools/cmd/cover
 	go get github.com/mattn/goveralls
@@ -28,7 +34,7 @@ depsdev:
 	go get github.com/tcnksm/ghr
 	go get github.com/Songmu/ghch/cmd/ghch
 
-crossbuild: deps depsdev
+crossbuild: depsdev
 	$(eval ver = v$(shell gobump show -r version/))
 	goxz -pv=$(ver) -os=linux -arch=386,amd64 -build-ldflags="$(RELEASE_BUILD_LDFLAGS)" \
 	  -d=./dist/$(ver)
@@ -41,4 +47,4 @@ release: crossbuild
 	$(eval ver = v$(shell gobump show -r version/))
 	ghr -username k1LoW -replace ${ver} dist/${ver}
 
-.PHONY: default test deps cover
+.PHONY: default test cover
