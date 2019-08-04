@@ -79,7 +79,7 @@ func (c *Cgroups) List() ([]string, error) {
 
 		err := filepath.Walk(searchDir, func(path string, f os.FileInfo, err error) error {
 			if err != nil {
-				return err
+				// continue walking
 			}
 			if f == nil {
 				return nil
