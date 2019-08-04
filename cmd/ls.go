@@ -23,9 +23,10 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"os"
+
 	"github.com/k1LoW/cgrps/cgroups"
 	"github.com/spf13/cobra"
-	"os"
 )
 
 // lsCmd represents the ls command

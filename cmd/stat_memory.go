@@ -22,10 +22,11 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/gizak/termui"
 	"github.com/k1LoW/cgrps/cgroups"
 	"github.com/k1LoW/cgrps/util"
-	"strings"
 )
 
 // NewMemoryStat create new Memory stat vals

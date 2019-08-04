@@ -23,12 +23,13 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/k1LoW/cgrps/proc"
-	"github.com/spf13/cobra"
-	"golang.org/x/crypto/ssh/terminal"
 	"io/ioutil"
 	"os"
 	"strings"
+
+	"github.com/k1LoW/cgrps/proc"
+	"github.com/spf13/cobra"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 // identifyCmd represents the identify command

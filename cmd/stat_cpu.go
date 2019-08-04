@@ -22,11 +22,12 @@ package cmd
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
+
 	"github.com/gizak/termui"
 	"github.com/k1LoW/cgrps/cgroups"
 	"github.com/k1LoW/cgrps/util"
-	"strconv"
-	"strings"
 )
 
 // CPUStat have CPU/CPUSet/CPUAcct stat

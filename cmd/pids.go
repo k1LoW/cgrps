@@ -21,16 +21,16 @@
 package cmd
 
 import (
-	"fmt"
-
 	"encoding/json"
 	"errors"
-	"github.com/k1LoW/cgrps/cgroups"
-	"github.com/spf13/cobra"
-	"golang.org/x/crypto/ssh/terminal"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
+
+	"github.com/k1LoW/cgrps/cgroups"
+	"github.com/spf13/cobra"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 // pidsCmd represents the pids command

@@ -22,6 +22,7 @@ package cmd
 
 import (
 	"fmt"
+
 	"github.com/k1LoW/cgrps/version"
 	"github.com/spf13/cobra"
 )

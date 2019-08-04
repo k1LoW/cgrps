@@ -24,14 +24,15 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/gizak/termui"
-	"github.com/k1LoW/cgrps/cgroups"
-	"github.com/spf13/cobra"
-	"golang.org/x/crypto/ssh/terminal"
 	"io/ioutil"
 	"math"
 	"os"
 	"strings"
+
+	"github.com/gizak/termui"
+	"github.com/k1LoW/cgrps/cgroups"
+	"github.com/spf13/cobra"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 // statCmd represents the stat command
