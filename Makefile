@@ -12,39 +12,36 @@ endif
 export GO111MODULE=on
 
 BUILD_LDFLAGS = -X $(PKG).commit=$(COMMIT) -X $(PKG).date=$(DATE)
-RELEASE_BUILD_LDFLAGS = -s -w $(BUILD_LDFLAGS)
 
 default: test
 
-test:
-	go test -cover -v $(shell go list ./... | grep -v vendor)
+ci: depsdev test
 
-cover: depsdev
-	goveralls -service=travis-ci
+test:
+	go test ./... -coverprofile=coverage.txt -covermode=count
+
+sec:
+	gosec ./...
 
 build:
 	go build -ldflags="$(BUILD_LDFLAGS)"
 
 depsdev:
 	go get golang.org/x/tools/cmd/cover
-	go get github.com/mattn/goveralls
-	go get github.com/golang/lint/golint
-	go get github.com/motemen/gobump/cmd/gobump
-	go get github.com/Songmu/goxz/cmd/goxz
-	go get github.com/tcnksm/ghr
+	go get golang.org/x/lint/golint
+	go get github.com/linyows/git-semv/cmd/git-semv
 	go get github.com/Songmu/ghch/cmd/ghch
-
-crossbuild: depsdev
-	$(eval ver = v$(shell gobump show -r version/))
-	goxz -pv=$(ver) -os=linux -arch=386,amd64 -build-ldflags="$(RELEASE_BUILD_LDFLAGS)" \
-	  -d=./dist/$(ver)
+	go get github.com/Songmu/gocredits/cmd/gocredits
+	go get github.com/securego/gosec/cmd/gosec
 
 prerelease:
-	$(eval ver = v$(shell gobump show -r version/))
-	ghch -w -N ${ver}
+	ghch -w -N ${VER}
+	gocredits . > CREDITS
+	git add CHANGELOG.md CREDITS
+	git commit -m'Bump up version number'
+	git tag ${VER}
 
-release: crossbuild
-	$(eval ver = v$(shell gobump show -r version/))
-	ghr -username k1LoW -replace ${ver} dist/${ver}
+release:
+	goreleaser --rm-dist
 
-.PHONY: default test cover
+.PHONY: default test

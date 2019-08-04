@@ -1,0 +1,44 @@
+before:
+  hooks:
+    - go mod download
+    - go mod tidy
+builds:
+-
+  id: cgrps-linux
+  env:
+  - CGO_ENABLED=0
+  goos:
+    - linux
+  goarch:
+    - amd64
+  ldflags:
+    - -s -w -X github.com/k1LoW/cgrps.version={{.Version}} -X github.com/k1LoW/cgrps.commit={{.FullCommit}} -X github.com/k1LoW/cgrps.date={{.Date}} -X github.com/k1LoW/cgrps/version.Version={{.Version}}
+archives:
+-
+  id: cgrps-archive
+  name_template: '{{ .ProjectName }}_v{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
+  files:
+    - CREDITS
+    - README.md
+    - CHANGELOG.md
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ .Version }}-next"
+changelog:
+  skip: true
+nfpms:
+  -
+    id: cgrps-nfpms
+    name_template: "{{ .ProjectName }}_{{ .Version }}-1_{{ .Os }}_{{ .Arch }}"
+    builds:
+    - cgrps-linux
+    homepage: https://github.com/k1LoW/cgrps
+    maintainer: Ken'ichiro Oyama <k1lowxb@gmail.com>
+    description: cgrps` is a set of commands for checking cgroups.
+    license: MIT
+    formats:
+      - deb
+      - rpm
+    bindir: /usr/local/bin
+    epoch: 1
