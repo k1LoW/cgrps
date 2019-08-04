@@ -78,6 +78,12 @@ func (c *Cgroups) List() ([]string, error) {
 		searchDir := filepath.Clean(fmt.Sprintf("%s/%s", c.FsPath, s))
 
 		err := filepath.Walk(searchDir, func(path string, f os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+			if f == nil {
+				return nil
+			}
 			if f.IsDir() {
 				c := strings.Replace(path, searchDir, "", 1)
 				if c != "" && !encountered[c] {
