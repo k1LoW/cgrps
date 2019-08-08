@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.7.2](https://github.com/k1LoW/cgrps/compare/v0.7.1...v0.7.2) (2019-08-08)
+
+
 ## [v0.7.1](https://github.com/k1LoW/cgrps/compare/v0.7.0...v0.7.1) (2019-08-05)
 
 * Fix nil pointer dereference [#11](https://github.com/k1LoW/cgrps/pull/11) ([k1LoW](https://github.com/k1LoW))
