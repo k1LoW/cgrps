@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.8.0](https://github.com/k1LoW/cgrps/compare/v0.7.2...v0.8.0) (2019-08-13)
+
+* bonsai using gosec [#13](https://github.com/k1LoW/cgrps/pull/13) ([k1LoW](https://github.com/k1LoW))
+* Change bindir [#12](https://github.com/k1LoW/cgrps/pull/12) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.7.2](https://github.com/k1LoW/cgrps/compare/v0.7.1...v0.7.2) (2019-08-08)
 
 
