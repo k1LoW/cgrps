@@ -40,5 +40,5 @@ nfpms:
     formats:
       - deb
       - rpm
-    bindir: /usr/local/bin
+    bindir: /usr/bin
     epoch: 1
