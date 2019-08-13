@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 )
@@ -20,7 +21,7 @@ func (p *Proc) Cgroup(pids []string) ([]string, error) {
 
 	for _, pid := range pids {
 		path := fmt.Sprintf("%s/%s/cgroup", p.FsPath, pid)
-		cgroup, err := os.Open(path)
+		cgroup, err := os.Open(filepath.Clean(path))
 		if err != nil {
 			_ = cgroup.Close()
 			return cs, err
