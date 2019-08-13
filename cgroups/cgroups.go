@@ -52,7 +52,7 @@ var Subsystems = []string{
 // ClkTck return clocks per sec (CLK_TCK)
 func ClkTck() float64 {
 	tck := float64(128)
-	out, err := exec.Command("/usr/bin/getconf", "CLK_TCK").Output()
+	out, err := exec.Command("/usr/bin/getconf", "CLK_TCK").Output() // #nosec
 	if err == nil {
 		i, err := strconv.ParseFloat(string(out), 64)
 		if err == nil {
@@ -162,7 +162,7 @@ func (c *Cgroups) listPids(h string) []int {
 			if base != "cgroup.procs" {
 				return nil
 			}
-			procs, err := os.Open(filepath.Join(path, "cgroup.procs"))
+			procs, err := os.Open(filepath.Clean(filepath.Join(path, "cgroup.procs")))
 			if err != nil {
 				_ = procs.Close()
 				return err
@@ -196,7 +196,7 @@ func (c *Cgroups) listPids(h string) []int {
 // ReadSimple read file and return value as string
 func (c *Cgroups) ReadSimple(h string, sname string, stat string) (string, error) {
 	path := fmt.Sprintf("%s/%s%s/%s", c.FsPath, sname, h, stat)
-	val, err := ioutil.ReadFile(path)
+	val, err := ioutil.ReadFile(filepath.Clean(path))
 	if err != nil {
 		return "", err
 	}
