@@ -79,7 +79,7 @@ func (c *Cgroups) List() ([]string, error) {
 
 		err := filepath.Walk(searchDir, func(path string, f os.FileInfo, err error) error {
 			if err != nil {
-				// continue walking
+				return nil
 			}
 			if f == nil {
 				return nil
@@ -108,7 +108,7 @@ func (c *Cgroups) List() ([]string, error) {
 func (c *Cgroups) AttachedSubsystems(h string) []string {
 	enabled := []string{}
 	for _, s := range Subsystems {
-		path := fmt.Sprintf("%s/%s%s", c.FsPath, s, h)
+		path := filepath.Clean(filepath.Join(c.FsPath, s, h))
 		if _, err := os.Lstat(path); err != nil {
 			continue
 		}
@@ -119,8 +119,22 @@ func (c *Cgroups) AttachedSubsystems(h string) []string {
 
 // IsAttachedSubsystem return subsystem is active or not in specific cgroup hierarchy
 func (c *Cgroups) IsAttachedSubsystem(h string, sname string) bool {
-	path := fmt.Sprintf("%s/%s%s", c.FsPath, sname, h)
-	if _, err := os.Lstat(path); err != nil {
+	path := filepath.Clean(filepath.Join(c.FsPath, sname, h))
+	f, err := os.Lstat(path)
+	if err != nil {
+		return false
+	}
+	if f.Mode()&os.ModeSymlink == os.ModeSymlink {
+		realpath, err := filepath.EvalSymlinks(path)
+		if err != nil {
+			return false
+		}
+		f, err = os.Lstat(realpath)
+		if err != nil {
+			return false
+		}
+	}
+	if !f.IsDir() {
 		return false
 	}
 	return true
@@ -153,7 +167,7 @@ func (c *Cgroups) listPids(h string) []int {
 	pids := []int{}
 
 	for _, s := range subsys {
-		path := fmt.Sprintf("%s/%s%s", c.FsPath, s, h)
+		path := filepath.Clean(filepath.Join(c.FsPath, s, h))
 		err := filepath.Walk(path, func(p string, f os.FileInfo, err error) error {
 			if err != nil {
 				return err
@@ -195,8 +209,7 @@ func (c *Cgroups) listPids(h string) []int {
 
 // ReadSimple read file and return value as string
 func (c *Cgroups) ReadSimple(h string, sname string, stat string) (string, error) {
-	path := fmt.Sprintf("%s/%s%s/%s", c.FsPath, sname, h, stat)
-	val, err := ioutil.ReadFile(filepath.Clean(path))
+	val, err := ioutil.ReadFile(filepath.Clean(filepath.Join(c.FsPath, sname, h, stat)))
 	if err != nil {
 		return "", err
 	}
