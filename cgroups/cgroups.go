@@ -79,7 +79,7 @@ func (c *Cgroups) List() ([]string, error) {
 
 		err := filepath.Walk(searchDir, func(path string, f os.FileInfo, err error) error {
 			if err != nil {
-				// continue walking
+				return nil
 			}
 			if f == nil {
 				return nil
@@ -109,7 +109,11 @@ func (c *Cgroups) AttachedSubsystems(h string) []string {
 	enabled := []string{}
 	for _, s := range Subsystems {
 		path := fmt.Sprintf("%s/%s%s", c.FsPath, s, h)
-		if _, err := os.Lstat(path); err != nil {
+		f, err := os.Lstat(path)
+		if err != nil {
+			continue
+		}
+		if !f.IsDir() {
 			continue
 		}
 		enabled = append(enabled, s)
@@ -120,7 +124,11 @@ func (c *Cgroups) AttachedSubsystems(h string) []string {
 // IsAttachedSubsystem return subsystem is active or not in specific cgroup hierarchy
 func (c *Cgroups) IsAttachedSubsystem(h string, sname string) bool {
 	path := fmt.Sprintf("%s/%s%s", c.FsPath, sname, h)
-	if _, err := os.Lstat(path); err != nil {
+	f, err := os.Lstat(path)
+	if err != nil {
+		return false
+	}
+	if !f.IsDir() {
 		return false
 	}
 	return true
