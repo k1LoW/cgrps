@@ -54,7 +54,7 @@ func ClkTck() float64 {
 	tck := float64(128)
 	out, err := exec.Command("/usr/bin/getconf", "CLK_TCK").Output() // #nosec
 	if err == nil {
-		i, err := strconv.ParseFloat(string(out), 64)
+		i, err := strconv.ParseFloat(strings.TrimSuffix(string(out), "\n"), 64)
 		if err == nil {
 			tck = float64(i)
 		}
