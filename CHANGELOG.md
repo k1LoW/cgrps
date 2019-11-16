@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.8.1](https://github.com/k1LoW/cgrps/compare/v0.8.0...v0.8.1) (2019-11-16)
+
+* Use GitHub actions [#15](https://github.com/k1LoW/cgrps/pull/15) ([k1LoW](https://github.com/k1LoW))
+* Fix ClkTck [#14](https://github.com/k1LoW/cgrps/pull/14) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.8.0](https://github.com/k1LoW/cgrps/compare/v0.7.2...v0.8.0) (2019-08-13)
 
 * bonsai using gosec [#13](https://github.com/k1LoW/cgrps/pull/13) ([k1LoW](https://github.com/k1LoW))
