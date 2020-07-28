@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.8.2](https://github.com/k1LoW/cgrps/compare/v0.8.1...v0.8.2) (2020-07-29)
+
+* Fix `cgrps pids` [#17](https://github.com/k1LoW/cgrps/pull/17) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.8.1](https://github.com/k1LoW/cgrps/compare/v0.8.0...v0.8.1) (2019-11-16)
 
 * Use GitHub actions [#15](https://github.com/k1LoW/cgrps/pull/15) ([k1LoW](https://github.com/k1LoW))
