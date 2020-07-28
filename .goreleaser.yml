@@ -30,7 +30,7 @@ changelog:
 nfpms:
   -
     id: cgrps-nfpms
-    name_template: "{{ .ProjectName }}_{{ .Version }}-1_{{ .Arch }}"
+    file_name_template: "{{ .ProjectName }}_{{ .Version }}-1_{{ .Arch }}"
     builds:
     - cgrps-linux
     homepage: https://github.com/k1LoW/cgrps
