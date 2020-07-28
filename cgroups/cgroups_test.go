@@ -18,6 +18,16 @@ func TestList(t *testing.T) {
 	}
 }
 
+func TestListPids(t *testing.T) {
+	c := Cgroups{FsPath: testFs()}
+	pids := c.ListPids([]string{""})
+	actual := len(pids)
+	expected := 0
+	if actual != expected {
+		t.Errorf("actual %v\nwant %v", actual, expected)
+	}
+}
+
 func TestAttachedSubsystems(t *testing.T) {
 	c := Cgroups{FsPath: testFs()}
 	subsystems := c.AttachedSubsystems("/my-cgroup")
