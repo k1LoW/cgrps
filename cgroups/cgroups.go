@@ -162,9 +162,11 @@ func (c *Cgroups) ListPids(hs []string) []int {
 }
 
 func (c *Cgroups) listPids(h string) []int {
-	subsys := c.AttachedSubsystems(h)
-
 	pids := []int{}
+	if h == "" {
+		return pids
+	}
+	subsys := c.AttachedSubsystems(h)
 
 	for _, s := range subsys {
 		path := filepath.Clean(filepath.Join(c.FsPath, s, h))
