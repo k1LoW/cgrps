@@ -2,4 +2,4 @@
 cgrps
 dist/
 vendor.orig/
-coverage.txt
+coverage.out
